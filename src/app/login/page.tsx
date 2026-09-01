@@ -31,16 +31,9 @@ export default async function LoginPage({
                 placeholder="Nome completo"
                 className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
               />
-              <select
-                name="role"
-                required
-                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm bg-white"
-              >
-                <option value="atendente">Atendente</option>
-                <option value="vistoriador">Vistoriador</option>
-                <option value="digitadora">Digitadora</option>
-                <option value="admin">Administrador</option>
-              </select>
+              <p className="text-xs text-zinc-500">
+                Após o cadastro, o administrador define sua função na tela Equipe.
+              </p>
             </>
           )}
           <input

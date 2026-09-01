@@ -27,7 +27,8 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = await createClient();
   const nome = String(formData.get("nome"));
-  const role = String(formData.get("role"));
+  // Função é definida pelo admin na tela Equipe — cadastro entra como 'atendente'
+  const role = "atendente";
   const { data, error } = await supabase.auth.signUp({
     email: String(formData.get("email")),
     password: String(formData.get("password")),
@@ -388,6 +389,27 @@ export async function concluirConferencia(formData: FormData) {
   revalidatePath("/conferencia");
   revalidatePath("/entregas");
   redirect("/conferencia");
+}
+
+// ===== EQUIPE (admin) =====
+export async function atualizarMembroEquipe(formData: FormData) {
+  const { supabase, user } = await getSupabaseAndUser();
+  const { data: me } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (me?.role !== "admin") redirect("/equipe?erro=Apenas%20administradores");
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      role: String(formData.get("role")),
+      ativo: formData.get("ativo") === "on",
+    })
+    .eq("id", String(formData.get("profile_id")));
+  if (error) redirect(`/equipe?erro=${encodeURIComponent(error.message)}`);
+  revalidatePath("/equipe");
 }
 
 // ===== FASE 8: ENTREGA =====

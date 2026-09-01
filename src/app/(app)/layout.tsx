@@ -10,6 +10,7 @@ const NAV = [
   { href: "/conferencia", label: "Conferência" },
   { href: "/entregas", label: "Entregas" },
   { href: "/clientes", label: "Clientes" },
+  { href: "/equipe", label: "Equipe", adminOnly: true },
 ];
 
 export default async function AppLayout({
@@ -31,7 +32,7 @@ export default async function AppLayout({
             AI Super Visão
           </Link>
           <nav className="flex gap-1 overflow-x-auto text-sm">
-            {NAV.map((n) => (
+            {NAV.filter((n) => !n.adminOnly || profile?.role === "admin").map((n) => (
               <Link
                 key={n.href}
                 href={n.href}
