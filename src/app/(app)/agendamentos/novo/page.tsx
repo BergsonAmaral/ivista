@@ -72,9 +72,9 @@ export default async function NovoAgendamentoPage({
               <span className="block text-zinc-500 mb-1">
                 Complexidade da vistoria (define o tempo estimado na rota)
               </span>
-              <select name="complexidade" className={inputCls}>
+              <select name="complexidade" defaultValue="media" className={inputCls}>
                 <option value="baixa">Baixa — ~40 min</option>
-                <option value="media" selected>Média — ~60 min</option>
+                <option value="media">Média — ~60 min</option>
                 <option value="alta">Alta — ~100 min (acesso difícil a componentes)</option>
               </select>
             </label>

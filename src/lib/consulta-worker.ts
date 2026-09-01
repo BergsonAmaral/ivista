@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getVehicleQueryProvider } from "@/lib/providers/vehicle-query";
 
@@ -6,8 +7,9 @@ function backoffSeconds(tentativas: number) {
   return 30 * Math.pow(2, tentativas);
 }
 
-export async function processarFilaConsultas(limit = 5) {
-  const supabase = createAdminClient();
+// client: passa o client autenticado do usuário (disparo manual) ou nada (cron → service role)
+export async function processarFilaConsultas(limit = 5, client?: SupabaseClient) {
+  const supabase = client ?? createAdminClient();
   const provider = getVehicleQueryProvider();
 
   const { data: pendentes, error } = await supabase

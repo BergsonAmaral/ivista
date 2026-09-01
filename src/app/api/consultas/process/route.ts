@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   const auth = req.headers.get("authorization");
   const isCron = auth === `Bearer ${process.env.CRON_SECRET}`;
 
+  let userClient = undefined;
   if (!isCron) {
     const supabase = await createClient();
     const {
@@ -17,10 +18,11 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
+    userClient = supabase;
   }
 
   try {
-    const result = await processarFilaConsultas();
+    const result = await processarFilaConsultas(5, userClient);
     return NextResponse.json(result);
   } catch (e) {
     return NextResponse.json(
