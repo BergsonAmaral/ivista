@@ -11,7 +11,7 @@ export default async function LoginPage({
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white rounded-xl border border-zinc-200 shadow-sm p-6">
-        <h1 className="text-2xl font-bold tracking-tight">VISTA</h1>
+        <h1 className="text-2xl font-bold tracking-tight">AI Super Visão Fortaleza</h1>
         <p className="text-sm text-zinc-500 mb-6">
           Gestão de vistorias automotivas
         </p>

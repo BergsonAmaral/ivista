@@ -153,8 +153,8 @@ export default async function LaudoPublicoPage({
       )}
 
       <footer className="text-xs text-zinc-400 border-t border-zinc-200 pt-4">
-        Documento gerado eletronicamente pelo sistema VISTA. Link de acesso pessoal e com validade
-        limitada.
+        Documento gerado eletronicamente pelo sistema AI Super Visão Fortaleza. Link de acesso
+        pessoal e com validade limitada.
       </footer>
     </main>
   );

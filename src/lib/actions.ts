@@ -31,11 +31,43 @@ export async function signup(formData: FormData) {
   const { data, error } = await supabase.auth.signUp({
     email: String(formData.get("email")),
     password: String(formData.get("password")),
+    options: { data: { nome, role } },
   });
   if (error || !data.user)
     redirect(`/login?erro=${encodeURIComponent(error?.message ?? "falha no cadastro")}`);
-  await supabase.from("profiles").insert({ id: data.user.id, nome, role });
+  if (!data.session)
+    redirect(
+      `/login?erro=${encodeURIComponent(
+        "Conta criada! Confirme o e-mail recebido antes de entrar (ou desative a confirmação de e-mail no Supabase)."
+      )}`
+    );
+  await supabase
+    .from("profiles")
+    .upsert({ id: data.user.id, nome, role }, { onConflict: "id" });
   redirect("/");
+}
+
+// Garante que o perfil exista (fallback quando o signup ocorreu sem sessão)
+export async function ensureProfile() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("nome, role")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profile) return profile;
+  const meta = (user.user_metadata ?? {}) as { nome?: string; role?: string };
+  const novo = {
+    id: user.id,
+    nome: meta.nome ?? user.email?.split("@")[0] ?? "Usuário",
+    role: (meta.role ?? "atendente") as "admin" | "atendente" | "vistoriador" | "digitadora",
+  };
+  await supabase.from("profiles").upsert(novo, { onConflict: "id" });
+  return { nome: novo.nome, role: novo.role };
 }
 
 export async function logout() {

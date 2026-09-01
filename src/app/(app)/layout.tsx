@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { logout } from "@/lib/actions";
+import { logout, ensureProfile } from "@/lib/actions";
 
 const NAV = [
   { href: "/", label: "Painel" },
@@ -21,16 +21,14 @@ export default async function AppLayout({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const { data: profile } = user
-    ? await supabase.from("profiles").select("nome, role").eq("id", user.id).maybeSingle()
-    : { data: null };
+  const profile = user ? await ensureProfile() : null;
 
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-10 bg-white border-b border-zinc-200">
         <div className="max-w-6xl mx-auto px-4 flex items-center gap-4 h-14">
-          <Link href="/" className="font-bold tracking-tight">
-            VISTA
+          <Link href="/" className="font-bold tracking-tight whitespace-nowrap">
+            AI Super Visão
           </Link>
           <nav className="flex gap-1 overflow-x-auto text-sm">
             {NAV.map((n) => (
