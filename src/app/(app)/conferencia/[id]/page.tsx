@@ -39,7 +39,10 @@ export default async function ConferenciaDetalhePage({
     chassi?: string; marca?: string; modelo?: string; situacao?: string; restricoes?: string[];
   } | null;
 
-  const paths = (registros ?? []).map((r) => r.foto_path).filter(Boolean) as string[];
+  const paths = [
+    ...((registros ?? []).map((r) => r.foto_path).filter(Boolean) as string[]),
+    ...(vistoria.coleta_foto_path ? [vistoria.coleta_foto_path as string] : []),
+  ];
   const fotoUrls = new Map<string, string>();
   if (paths.length) {
     const { data: signed } = await supabase.storage
@@ -114,6 +117,24 @@ export default async function ConferenciaDetalhePage({
       <Card className="p-5 mb-5">
         <h2 className="font-semibold mb-3">Fotos × marcações do vistoriador</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {vistoria.coleta_foto_path && (
+            <div className="rounded-lg border border-blue-200 overflow-hidden">
+              {fotoUrls.get(vistoria.coleta_foto_path) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={fotoUrls.get(vistoria.coleta_foto_path)}
+                  alt="Foto inicial da coleta"
+                  className="h-28 w-full object-cover"
+                />
+              ) : (
+                <div className="h-28 w-full bg-zinc-100" />
+              )}
+              <div className="p-2">
+                <div className="text-xs font-medium truncate">Foto inicial (coleta)</div>
+                <div className="text-[11px] text-blue-600">chegada ao local</div>
+              </div>
+            </div>
+          )}
           {(itens ?? []).map((it) => {
             const r = registroPorItem.get(it.id);
             const url = r?.foto_path ? fotoUrls.get(r.foto_path) : null;

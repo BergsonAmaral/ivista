@@ -4,6 +4,7 @@ import { Card, PageTitle, Alert, Badge, inputCls, btnPrimary } from "@/component
 import { Stepper } from "@/components/Stepper";
 import { ConsultaPanel } from "@/components/ConsultaPanel";
 import { ItemChecklistForm } from "@/components/ItemChecklistForm";
+import { ColetaFotoUpload } from "@/components/ColetaFotoUpload";
 import { confirmarColeta, salvarDadosVistoria, enviarVistoria } from "@/lib/actions";
 
 const STEPS = ["Coleta", "Fotos & condições", "Dados do veículo", "Envio"];
@@ -46,7 +47,10 @@ export default async function VistoriaPage({
   const registroPorItem = new Map((registros ?? []).map((r) => [r.checklist_item_id, r]));
 
   // URLs assinadas das fotos
-  const paths = (registros ?? []).map((r) => r.foto_path).filter(Boolean) as string[];
+  const paths = [
+    ...((registros ?? []).map((r) => r.foto_path).filter(Boolean) as string[]),
+    ...(vistoria.coleta_foto_path ? [vistoria.coleta_foto_path as string] : []),
+  ];
   const fotoUrls = new Map<string, string>();
   if (paths.length) {
     const { data: signed } = await supabase.storage
@@ -125,20 +129,34 @@ export default async function VistoriaPage({
                   {ag.contato_telefone ? ` · ${ag.contato_telefone}` : ""}
                 </p>
               )}
+              <div className="mb-2">
+                <ColetaFotoUpload
+                  vistoriaId={vistoria.id}
+                  fotoUrl={
+                    vistoria.coleta_foto_path
+                      ? (fotoUrls.get(vistoria.coleta_foto_path) ?? null)
+                      : null
+                  }
+                />
+              </div>
               <form action={confirmarColeta} className="space-y-2">
                 <input type="hidden" name="vistoria_id" value={vistoria.id} />
                 {[
                   { name: "coleta_chaves", label: "Recebi as chaves do veículo" },
                   { name: "coleta_documento", label: "Recebi o documento (CRLV)" },
-                  { name: "coleta_foto_inicial", label: "Fiz a foto inicial do veículo no local" },
                 ].map((c) => (
                   <label key={c.name} className="flex items-center gap-2 text-sm p-2 rounded-lg border border-zinc-200 bg-zinc-50">
                     <input type="checkbox" name={c.name} className="h-4 w-4" required />
                     {c.label}
                   </label>
                 ))}
-                <button className={`${btnPrimary} w-full`}>
-                  Confirmar coleta e disparar consulta
+                <button
+                  disabled={!vistoria.coleta_foto_path}
+                  className={`${btnPrimary} w-full`}
+                >
+                  {vistoria.coleta_foto_path
+                    ? "Confirmar coleta e disparar consulta"
+                    : "Confirmar coleta (envie a foto inicial primeiro)"}
                 </button>
               </form>
             </>

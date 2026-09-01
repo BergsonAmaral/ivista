@@ -214,17 +214,39 @@ export async function atribuirParada(formData: FormData) {
 }
 
 // ===== FASE 3: COLETA (dispara a consulta da Fase 4 ao confirmar presença) =====
+export async function salvarFotoColeta(vistoriaId: string, fotoPath: string) {
+  const { supabase } = await getSupabaseAndUser();
+  await supabase
+    .from("vistorias")
+    .update({ coleta_foto_path: fotoPath })
+    .eq("id", vistoriaId);
+  revalidatePath(`/vistorias/${vistoriaId}`);
+}
+
 export async function confirmarColeta(formData: FormData) {
   const { supabase } = await getSupabaseAndUser();
   const vistoriaId = String(formData.get("vistoria_id"));
   const chaves = formData.get("coleta_chaves") === "on";
   const documento = formData.get("coleta_documento") === "on";
-  const fotoInicial = formData.get("coleta_foto_inicial") === "on";
 
-  if (!chaves || !documento || !fotoInicial) {
+  if (!chaves || !documento) {
     redirect(
       `/vistorias/${vistoriaId}?erro=${encodeURIComponent(
-        "Checklist de coleta incompleto: confirme chaves, documento e foto inicial"
+        "Checklist de coleta incompleto: confirme chaves e documento"
+      )}`
+    );
+  }
+
+  // Trava real da foto inicial: precisa existir no Storage (não é checkbox)
+  const { data: atual } = await supabase
+    .from("vistorias")
+    .select("coleta_foto_path")
+    .eq("id", vistoriaId)
+    .single();
+  if (!atual?.coleta_foto_path) {
+    redirect(
+      `/vistorias/${vistoriaId}?erro=${encodeURIComponent(
+        "Envie a foto inicial do veículo antes de confirmar a coleta"
       )}`
     );
   }
