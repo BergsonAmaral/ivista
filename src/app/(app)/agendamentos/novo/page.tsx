@@ -9,13 +9,21 @@ export default async function NovoAgendamentoPage({
 }) {
   const { erro } = await searchParams;
   const supabase = await createClient();
-  const { data: clientes } = await supabase.from("clientes").select("id, nome").order("nome");
+  const [{ data: clientes }, { data: vistoriadores }] = await Promise.all([
+    supabase.from("clientes").select("id, nome").order("nome"),
+    supabase
+      .from("profiles")
+      .select("id, nome")
+      .eq("role", "vistoriador")
+      .eq("ativo", true)
+      .order("nome"),
+  ]);
 
   return (
     <div className="max-w-2xl">
       <PageTitle
         title="Novo agendamento"
-        subtitle="Passo 1 de 2 do atendimento: registre a solicitação. Depois, roteirize na tela de Rotas."
+        subtitle="Registre a solicitação e, se quiser, já atribua o vistoriador — tudo numa tela só."
       />
       {erro && <Alert tipo="erro">{erro}</Alert>}
 
@@ -122,6 +130,20 @@ export default async function NovoAgendamentoPage({
               <span className="block text-zinc-500 mb-1">Observações</span>
               <textarea name="observacoes" rows={2} className={inputCls} />
             </label>
+          </fieldset>
+
+          <fieldset className="space-y-3">
+            <legend className="text-sm font-semibold mb-1">
+              5. Vistoriador <span className="font-normal text-zinc-400">(opcional — pode atribuir depois em Rotas)</span>
+            </legend>
+            <select name="vistoriador_id" className={inputCls}>
+              <option value="">— atribuir depois —</option>
+              {(vistoriadores ?? []).map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.nome}
+                </option>
+              ))}
+            </select>
           </fieldset>
 
           <button className={`${btnPrimary} w-full`}>Confirmar agendamento</button>

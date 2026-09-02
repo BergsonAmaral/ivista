@@ -14,7 +14,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${geist.className} bg-zinc-50 text-zinc-900 antialiased`}>
+      <body className={`${geist.className} bg-slate-50 text-slate-900 antialiased`}>
         {children}
       </body>
     </html>

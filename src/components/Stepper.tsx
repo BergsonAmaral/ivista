@@ -6,7 +6,7 @@ export function Stepper({
   current: number; // índice da etapa atual (0-based); etapas anteriores = concluídas
 }) {
   return (
-    <ol className="flex items-center gap-0 overflow-x-auto py-2">
+    <ol className="flex items-center gap-0 overflow-x-auto py-3">
       {steps.map((label, i) => {
         const done = i < current;
         const active = i === current;
@@ -14,24 +14,30 @@ export function Stepper({
           <li key={label} className="flex items-center shrink-0">
             {i > 0 && (
               <div
-                className={`h-0.5 w-6 sm:w-10 ${done || active ? "bg-emerald-500" : "bg-zinc-200"}`}
+                className={`h-1 w-6 sm:w-10 rounded-full ${
+                  done || active ? "bg-emerald-400" : "bg-slate-200"
+                }`}
               />
             )}
             <div className="flex items-center gap-2 px-2">
               <span
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-colors ${
                   done
-                    ? "bg-emerald-500 text-white"
+                    ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/30"
                     : active
-                      ? "bg-zinc-900 text-white"
-                      : "bg-zinc-200 text-zinc-500"
+                      ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30 ring-4 ring-indigo-100"
+                      : "bg-slate-100 text-slate-400"
                 }`}
               >
                 {done ? "✓" : i + 1}
               </span>
               <span
                 className={`text-xs sm:text-sm whitespace-nowrap ${
-                  active ? "font-semibold" : "text-zinc-500"
+                  active
+                    ? "font-bold text-slate-900"
+                    : done
+                      ? "font-medium text-emerald-700"
+                      : "text-slate-400"
                 }`}
               >
                 {label}

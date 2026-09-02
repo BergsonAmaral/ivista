@@ -102,26 +102,39 @@ export async function criarAgendamento(formData: FormData) {
     }
   }
 
-  const { error } = await supabase.from("agendamentos").insert({
-    canal: String(formData.get("canal") ?? "manual"),
-    cliente_id: formData.get("cliente_id") || null,
-    placa: placa || null,
-    modelo: formData.get("modelo") || null,
-    marca: formData.get("marca") || null,
-    ano: formData.get("ano") || null,
-    complexidade: String(formData.get("complexidade") ?? "media"),
-    endereco: String(formData.get("endereco")),
-    cidade: formData.get("cidade") || null,
-    data_agendada: dataAgendada || null,
-    janela_inicio: formData.get("janela_inicio") || null,
-    janela_fim: formData.get("janela_fim") || null,
-    contato_nome: formData.get("contato_nome") || null,
-    contato_telefone: formData.get("contato_telefone") || null,
-    observacoes: formData.get("observacoes") || null,
-    status: "confirmado",
-    criado_por: user.id,
-  });
-  if (error) redirect(`/agendamentos/novo?erro=${encodeURIComponent(error.message)}`);
+  const { data: novo, error } = await supabase
+    .from("agendamentos")
+    .insert({
+      canal: String(formData.get("canal") ?? "manual"),
+      cliente_id: formData.get("cliente_id") || null,
+      placa: placa || null,
+      modelo: formData.get("modelo") || null,
+      marca: formData.get("marca") || null,
+      ano: formData.get("ano") || null,
+      complexidade: String(formData.get("complexidade") ?? "media"),
+      endereco: String(formData.get("endereco")),
+      cidade: formData.get("cidade") || null,
+      data_agendada: dataAgendada || null,
+      janela_inicio: formData.get("janela_inicio") || null,
+      janela_fim: formData.get("janela_fim") || null,
+      contato_nome: formData.get("contato_nome") || null,
+      contato_telefone: formData.get("contato_telefone") || null,
+      observacoes: formData.get("observacoes") || null,
+      status: "confirmado",
+      criado_por: user.id,
+    })
+    .select("id")
+    .single();
+  if (error || !novo)
+    redirect(`/agendamentos/novo?erro=${encodeURIComponent(error?.message ?? "erro")}`);
+
+  // Atalho do admin: atribuir o vistoriador já na criação (Fases 1+2 numa tela)
+  const vistoriadorId = formData.get("vistoriador_id");
+  if (vistoriadorId && dataAgendada) {
+    const erroRota = await roteirizar(supabase, novo.id, String(vistoriadorId), dataAgendada);
+    if (erroRota) redirect(`/agendamentos?erro=${encodeURIComponent(erroRota)}`);
+  }
+
   revalidatePath("/agendamentos");
   redirect("/agendamentos");
 }
@@ -152,13 +165,15 @@ const TEMPO_POR_COMPLEXIDADE: Record<string, number> = {
   alta: 100,
 };
 
-export async function atribuirParada(formData: FormData) {
-  const { supabase } = await getSupabaseAndUser();
-  const agendamentoId = String(formData.get("agendamento_id"));
-  const vistoriadorId = String(formData.get("vistoriador_id"));
-  const data = String(formData.get("data"));
+type AnySupabase = Awaited<ReturnType<typeof createClient>>;
 
-  // rota do dia (cria se não existir)
+// Núcleo da roteirização: cria rota do dia, parada e a vistoria vinculada.
+async function roteirizar(
+  supabase: AnySupabase,
+  agendamentoId: string,
+  vistoriadorId: string,
+  data: string
+): Promise<string | null> {
   let rotaId: string;
   const { data: rota } = await supabase
     .from("rotas")
@@ -174,7 +189,7 @@ export async function atribuirParada(formData: FormData) {
       .insert({ vistoriador_id: vistoriadorId, data })
       .select("id")
       .single();
-    if (error) redirect(`/rotas?erro=${encodeURIComponent(error.message)}`);
+    if (error) return error.message;
     rotaId = nova.id;
   }
 
@@ -195,14 +210,13 @@ export async function atribuirParada(formData: FormData) {
     ordem: (count ?? 0) + 1,
     tempo_estimado_min: TEMPO_POR_COMPLEXIDADE[ag?.complexidade ?? "media"],
   });
-  if (perr) redirect(`/rotas?erro=${encodeURIComponent(perr.message)}`);
+  if (perr) return perr.message;
 
   await supabase
     .from("agendamentos")
     .update({ status: "roteirizado" })
     .eq("id", agendamentoId);
 
-  // cria a vistoria vinculada (Fases 3–6)
   await supabase
     .from("vistorias")
     .insert({ agendamento_id: agendamentoId, vistoriador_id: vistoriadorId })
@@ -211,6 +225,19 @@ export async function atribuirParada(formData: FormData) {
 
   revalidatePath("/rotas");
   revalidatePath("/vistorias");
+  revalidatePath("/");
+  return null;
+}
+
+export async function atribuirParada(formData: FormData) {
+  const { supabase } = await getSupabaseAndUser();
+  const erro = await roteirizar(
+    supabase,
+    String(formData.get("agendamento_id")),
+    String(formData.get("vistoriador_id")),
+    String(formData.get("data"))
+  );
+  if (erro) redirect(`/rotas?erro=${encodeURIComponent(erro)}`);
 }
 
 // ===== FASE 3: COLETA (dispara a consulta da Fase 4 ao confirmar presença) =====
