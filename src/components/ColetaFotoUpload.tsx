@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { salvarFotoColeta } from "@/lib/actions";
+import { Camera } from "lucide-react";
 
 // Fase 3 — foto inicial obrigatória: a coleta só pode ser confirmada com ela no Storage.
 export function ColetaFotoUpload({
@@ -52,8 +53,8 @@ export function ColetaFotoUpload({
           className="h-14 w-14 rounded-lg object-cover border border-zinc-200"
         />
       ) : (
-        <div className="h-14 w-14 rounded-lg bg-zinc-100 border border-dashed border-zinc-300 flex items-center justify-center text-zinc-400 text-xl">
-          📷
+        <div className="h-14 w-14 rounded-lg bg-zinc-100 border border-dashed border-zinc-300 flex items-center justify-center text-zinc-400">
+          <Camera className="h-5 w-5" />
         </div>
       )}
       <div className="flex-1">

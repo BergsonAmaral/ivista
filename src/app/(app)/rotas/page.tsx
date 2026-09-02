@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { atribuirParada } from "@/lib/actions";
 import { haversineKm } from "@/lib/geo";
 import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
+import { MapPin } from "lucide-react";
 
 export default async function RotasPage({
   searchParams,
@@ -76,7 +77,7 @@ export default async function RotasPage({
   return (
     <div>
       <PageTitle
-        title="Fase 2 — Roteirização"
+        title="Rotas do dia"
         subtitle="Atribua agendamentos a vistoriadores. O tempo estimado considera a complexidade do veículo."
       />
       {erro && <Alert tipo="erro">{erro}</Alert>}
@@ -119,7 +120,7 @@ export default async function RotasPage({
                 </div>
                 {sugestao && (
                   <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium px-2.5 py-1">
-                    📍 Mais próximo: <b>{sugestao.nome}</b> (~{sugestao.km.toFixed(1)} km)
+                    <MapPin className="h-3.5 w-3.5" /> Mais próximo: <b>{sugestao.nome}</b> (~{sugestao.km.toFixed(1)} km)
                   </div>
                 )}
                 <form action={atribuirParada} className="mt-3 flex flex-wrap items-center gap-2">

@@ -2,18 +2,19 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { logout, ensureProfile } from "@/lib/actions";
 import { SideNav, BottomNav, type NavItem } from "@/components/NavLinks";
+import { LogOut } from "lucide-react";
 
 // Cada função vê apenas as telas que usa — menos abas, menos confusão
 const NAV: (NavItem & { roles: string[] })[] = [
-  { href: "/", label: "Painel", icon: "🏠", roles: ["admin", "atendente", "digitadora"] },
-  { href: "/agendamentos", label: "Agenda", icon: "📅", roles: ["admin", "atendente"] },
-  { href: "/rotas", label: "Rotas", icon: "🗺️", roles: ["admin", "atendente"] },
-  { href: "/vistorias", label: "Vistorias", icon: "📷", roles: ["admin", "vistoriador"] },
-  { href: "/conferencia", label: "Conferência", icon: "🔍", roles: ["admin", "digitadora"] },
-  { href: "/entregas", label: "Entregas", icon: "📨", roles: ["admin", "digitadora", "atendente"] },
-  { href: "/clientes", label: "Clientes", icon: "🏢", roles: ["admin", "atendente"] },
-  { href: "/equipe", label: "Equipe", icon: "👥", roles: ["admin"] },
-  { href: "/portal", label: "Portal", icon: "🚗", roles: ["cliente"] },
+  { href: "/", label: "Painel", icon: "painel", section: "Operação", roles: ["admin", "atendente", "digitadora"] },
+  { href: "/agendamentos", label: "Agenda", icon: "agenda", section: "Operação", roles: ["admin", "atendente"] },
+  { href: "/rotas", label: "Rotas", icon: "rotas", section: "Operação", roles: ["admin", "atendente"] },
+  { href: "/vistorias", label: "Vistorias", icon: "vistorias", section: "Operação", roles: ["admin", "vistoriador"] },
+  { href: "/conferencia", label: "Conferência", icon: "conferencia", section: "Operação", roles: ["admin", "digitadora"] },
+  { href: "/entregas", label: "Entregas", icon: "entregas", section: "Operação", roles: ["admin", "digitadora", "atendente"] },
+  { href: "/clientes", label: "Clientes", icon: "clientes", section: "Cadastros", roles: ["admin", "atendente"] },
+  { href: "/equipe", label: "Equipe", icon: "equipe", section: "Administração", roles: ["admin"] },
+  { href: "/portal", label: "Portal", icon: "portal", roles: ["cliente"] },
 ];
 
 const ROLE_LABEL: Record<string, string> = {
@@ -36,7 +37,7 @@ export default async function AppLayout({
   const profile = user ? await ensureProfile() : null;
 
   const itens = NAV.filter((n) => n.roles.includes(profile?.role ?? "atendente")).map(
-    ({ href, label, icon }) => ({ href, label, icon })
+    ({ href, label, icon, section }) => ({ href, label, icon, section })
   );
 
   const iniciais = (profile?.nome ?? user?.email ?? "?")
@@ -77,9 +78,9 @@ export default async function AppLayout({
           <form action={logout}>
             <button
               title="Sair"
-              className="text-slate-400 hover:text-white transition-colors text-sm"
+              className="text-slate-400 hover:text-white transition-colors"
             >
-              ⎋
+              <LogOut className="h-4 w-4" />
             </button>
           </form>
         </div>

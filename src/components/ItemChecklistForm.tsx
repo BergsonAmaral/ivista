@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { salvarItemVistoria } from "@/lib/actions";
+import { Camera } from "lucide-react";
 
 type Props = {
   vistoriaId: string;
@@ -107,8 +108,8 @@ export function ItemChecklistForm({ vistoriaId, item, registro, fotoUrl, bloquea
           // eslint-disable-next-line @next/next/no-img-element
           <img src={fotoUrl} alt={item.nome} className="h-14 w-14 rounded-lg object-cover border border-zinc-200" />
         ) : (
-          <div className="h-14 w-14 rounded-lg bg-zinc-100 border border-dashed border-zinc-300 flex items-center justify-center text-zinc-400 text-xl">
-            📷
+          <div className="h-14 w-14 rounded-lg bg-zinc-100 border border-dashed border-zinc-300 flex items-center justify-center text-zinc-400">
+            <Camera className="h-5 w-5" />
           </div>
         )}
         <div className="flex-1">

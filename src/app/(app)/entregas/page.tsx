@@ -16,7 +16,7 @@ export default async function EntregasPage() {
   return (
     <div>
       <PageTitle
-        title="Fase 8 — Entregas"
+        title="Entregas"
         subtitle="Laudos aprovados geram link seguro automaticamente. Envie ao cliente e acompanhe a visualização."
       />
       <div className="space-y-3">

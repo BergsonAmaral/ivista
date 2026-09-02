@@ -15,7 +15,7 @@ export default async function ConferenciaPage() {
   return (
     <div>
       <PageTitle
-        title="Fase 7 — Conferência"
+        title="Conferência de laudos"
         subtitle="Auditoria assistida: divergências entre chassi físico, documental e consulta são destacadas automaticamente"
       />
       <div className="space-y-3">

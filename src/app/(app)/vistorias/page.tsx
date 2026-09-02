@@ -30,7 +30,7 @@ export default async function VistoriasPage() {
   return (
     <div>
       <PageTitle
-        title="Fases 3–6 — Vistorias"
+        title="Vistorias"
         subtitle="Fluxo guiado passo a passo: coleta → consulta → fotos → dados → envio"
       />
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -72,7 +72,7 @@ export default async function VistoriasPage() {
         })}
         {!vistorias?.length && (
           <Card className="p-8 text-center text-zinc-400 text-sm sm:col-span-2 lg:col-span-3">
-            Nenhuma vistoria. Elas são criadas automaticamente quando um agendamento é roteirizado (Fase 2).
+            Nenhuma vistoria. Elas aparecem aqui automaticamente quando um agendamento recebe um vistoriador.
           </Card>
         )}
       </div>

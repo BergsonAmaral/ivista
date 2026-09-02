@@ -1,12 +1,12 @@
 import { login, signup } from "@/lib/actions";
 import { inputCls, btnPrimary } from "@/components/ui";
 
-const FASES = [
-  "Agenda unificada omnichannel",
-  "Roteirização por complexidade",
-  "Consulta veicular automática com retry",
-  "Trava de envio — laudo sempre completo",
-  "Conferência assistida e entrega com link seguro",
+const DIFERENCIAIS = [
+  "Agendamento centralizado em todos os canais",
+  "Roteirização inteligente das equipes de campo",
+  "Consulta veicular automatizada e auditável",
+  "Laudos completos, verificados em dupla conferência",
+  "Entrega digital com link seguro ao cliente",
 ];
 
 export default async function LoginPage({
@@ -36,13 +36,12 @@ export default async function LoginPage({
         </div>
         <div className="relative">
           <h2 className="text-3xl font-bold leading-snug mb-6">
-            Da chegada do pedido
-            <br />à entrega do laudo —
+            Precisão em cada vistoria.
             <br />
-            <span className="text-red-400">sem gargalos.</span>
+            <span className="text-red-400">Confiança em cada laudo.</span>
           </h2>
           <ul className="space-y-3">
-            {FASES.map((f) => (
+            {DIFERENCIAIS.map((f) => (
               <li key={f} className="flex items-center gap-3 text-sm text-slate-300">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-[11px]">
                   ✓
@@ -53,7 +52,7 @@ export default async function LoginPage({
           </ul>
         </div>
         <p className="relative text-xs text-slate-500">
-          Fluxo operacional completo em 8 fases · Fortaleza, CE
+          AI Super Visão Fortaleza · Vistorias automotivas com tecnologia e rastreabilidade
         </p>
       </div>
 

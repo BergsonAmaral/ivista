@@ -97,7 +97,7 @@ export default async function VistoriaPage({
 
       {erro && <Alert tipo="erro">{erro}</Alert>}
       {ok === "enviada" && (
-        <Alert tipo="ok">Laudo enviado com sucesso! Ele entrou na fila de conferência (Fase 7).</Alert>
+        <Alert tipo="ok">Laudo enviado com sucesso! Ele entrou na fila de conferência.</Alert>
       )}
 
       <Card className="px-3 mb-5">
@@ -297,7 +297,7 @@ export default async function VistoriaPage({
           ) : (
             <>
               <p className="text-sm text-emerald-700 mb-3">
-                ✓ Todos os requisitos cumpridos. O laudo será enviado para a conferência (Fase 7).
+                ✓ Todos os requisitos cumpridos. O laudo será enviado para a conferência.
               </p>
               <form action={enviarVistoria.bind(null, vistoria.id)}>
                 <button className={`${btnPrimary} w-full bg-emerald-600 hover:bg-emerald-700`}>

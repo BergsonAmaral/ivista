@@ -183,7 +183,7 @@ export default async function ConferenciaDetalhePage({
                 value="aprovar"
                 className={`${btnPrimary} flex-1 bg-emerald-600 hover:bg-emerald-700`}
               >
-                Aprovar — gerar entrega (Fase 8)
+                Aprovar e liberar entrega
               </button>
               <button name="decisao" value="reprovar" className={`${btnSecondary} flex-1 text-red-600 border-red-300`}>
                 Devolver ao vistoriador

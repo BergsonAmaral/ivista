@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, Badge } from "@/components/ui";
+import { CalendarPlus, Map, ClipboardCheck, Send, PartyPopper, AlertTriangle } from "lucide-react";
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -111,26 +112,26 @@ export default async function Dashboard() {
       href: "/agendamentos/novo",
       titulo: "Agendar vistoria",
       desc: "Registrar novo pedido",
-      icone: "📅",
+      icone: CalendarPlus,
       destaque: true,
     },
     {
       href: "/rotas",
       titulo: "Rotas de hoje",
       desc: `${rotasHoje ?? 0} rota(s) em campo`,
-      icone: "🗺️",
+      icone: Map,
     },
     {
       href: "/conferencia",
       titulo: "Conferir laudos",
       desc: `${conferenciasPend.count ?? 0} aguardando`,
-      icone: "🔍",
+      icone: ClipboardCheck,
     },
     {
       href: "/entregas",
       titulo: "Entregas",
       desc: `${entregasPend.count ?? 0} para enviar`,
-      icone: "📨",
+      icone: Send,
     },
   ];
 
@@ -154,7 +155,10 @@ export default async function Dashboard() {
                   : "bg-white border border-zinc-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.06)]"
               }`}
             >
-              <div className="text-2xl mb-2">{a.icone}</div>
+              <a.icone
+                className={`h-7 w-7 mb-2 ${a.destaque ? "text-white" : "text-red-600"}`}
+                strokeWidth={2}
+              />
               <div className={`font-bold text-sm ${a.destaque ? "" : "text-slate-900"}`}>
                 {a.titulo}
               </div>
@@ -172,7 +176,7 @@ export default async function Dashboard() {
 
       {(consultasFalha.count ?? 0) > 0 && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm p-3.5">
-          ⚠ {consultasFalha.count} consulta(s) veicular(es) com falha —{" "}
+          <AlertTriangle className="inline h-4 w-4 mr-1 -mt-0.5" /> {consultasFalha.count} consulta(s) veicular(es) com falha —{" "}
           <Link href="/vistorias" className="underline font-semibold">
             verificar
           </Link>
@@ -186,7 +190,8 @@ export default async function Dashboard() {
       <Card className="divide-y divide-zinc-100">
         {acoes.length === 0 && (
           <div className="p-8 text-center text-sm text-slate-400">
-            Tudo em dia — nenhuma ação pendente. 🎉
+            <PartyPopper className="h-6 w-6 mx-auto mb-2 text-emerald-500" />
+            Tudo em dia — nenhuma ação pendente.
           </div>
         )}
         {acoes.map((a) => (

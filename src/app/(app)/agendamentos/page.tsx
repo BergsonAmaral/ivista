@@ -16,7 +16,7 @@ export default async function AgendamentosPage() {
   return (
     <div>
       <PageTitle
-        title="Fase 1 — Agendamentos"
+        title="Agendamentos"
         subtitle="Agenda unificada: todos os canais (telefone, WhatsApp, parceiros) num só lugar"
         action={
           <Link href="/agendamentos/novo" className={btnPrimary}>
