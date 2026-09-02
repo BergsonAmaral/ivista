@@ -101,7 +101,7 @@ export default async function PortalPage({
                 <a
                   href={`/laudo/${e.token_acesso}`}
                   target="_blank"
-                  className="rounded-lg bg-indigo-600 text-white px-3.5 py-1.5 text-xs font-semibold hover:bg-indigo-500"
+                  className="rounded-lg bg-red-600 text-white px-3.5 py-1.5 text-xs font-semibold hover:bg-red-500"
                 >
                   Abrir laudo
                 </a>

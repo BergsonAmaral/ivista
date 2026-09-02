@@ -51,7 +51,7 @@ export default async function AppLayout({
       {/* ===== Sidebar (desktop) ===== */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col bg-slate-900 text-white p-4">
         <Link href="/" className="flex items-center gap-2.5 px-2 py-3 mb-4">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 font-black text-sm shadow-lg shadow-indigo-900/40">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-700 font-black text-sm shadow-lg shadow-red-950/40">
             AI
           </span>
           <span className="font-bold tracking-tight leading-tight">
@@ -89,7 +89,7 @@ export default async function AppLayout({
       <header className="lg:hidden sticky top-0 z-20 bg-slate-900 text-white">
         <div className="flex items-center gap-3 h-14 px-4">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 font-black text-xs">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-rose-700 font-black text-xs">
               AI
             </span>
             <span className="font-bold text-sm">Super Visão</span>

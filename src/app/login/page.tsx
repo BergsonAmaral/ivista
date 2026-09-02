@@ -21,10 +21,10 @@ export default async function LoginPage({
     <main className="min-h-screen grid lg:grid-cols-2 bg-slate-50">
       {/* Painel de marca */}
       <div className="hidden lg:flex flex-col justify-between bg-slate-900 text-white p-12 relative overflow-hidden">
-        <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-indigo-600/30 blur-3xl" />
-        <div className="absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-violet-600/20 blur-3xl" />
+        <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-red-600/30 blur-3xl" />
+        <div className="absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-rose-600/20 blur-3xl" />
         <div className="relative flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 font-black shadow-lg shadow-indigo-900/40">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-700 font-black shadow-lg shadow-red-950/40">
             AI
           </span>
           <div className="font-bold text-lg leading-tight">
@@ -39,7 +39,7 @@ export default async function LoginPage({
             Da chegada do pedido
             <br />à entrega do laudo —
             <br />
-            <span className="text-indigo-400">sem gargalos.</span>
+            <span className="text-red-400">sem gargalos.</span>
           </h2>
           <ul className="space-y-3">
             {FASES.map((f) => (
@@ -61,7 +61,7 @@ export default async function LoginPage({
       <div className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2.5 mb-8 justify-center">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-black shadow-md">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-700 text-white font-black shadow-md">
               AI
             </span>
             <span className="font-bold text-slate-900">Super Visão Fortaleza</span>
@@ -107,7 +107,7 @@ export default async function LoginPage({
 
           <a
             href={cadastro ? "/login" : "/login?modo=cadastro"}
-            className="block text-center text-sm text-slate-500 mt-5 hover:text-indigo-600 transition-colors"
+            className="block text-center text-sm text-slate-500 mt-5 hover:text-red-600 transition-colors"
           >
             {cadastro ? "Já tenho conta — entrar" : "Não tem conta? Criar nova conta"}
           </a>

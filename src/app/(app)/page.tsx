@@ -150,7 +150,7 @@ export default async function Dashboard() {
             <div
               className={`rounded-2xl p-4 h-full transition-all hover:-translate-y-0.5 hover:shadow-md ${
                 a.destaque
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
+                  ? "bg-red-600 text-white shadow-md shadow-red-600/25"
                   : "bg-white border border-zinc-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.06)]"
               }`}
             >
@@ -160,7 +160,7 @@ export default async function Dashboard() {
               </div>
               <div
                 className={`text-xs mt-0.5 ${
-                  a.destaque ? "text-indigo-200" : "text-slate-500"
+                  a.destaque ? "text-red-200" : "text-slate-500"
                 }`}
               >
                 {a.desc}
@@ -199,7 +199,7 @@ export default async function Dashboard() {
             </div>
             <Link
               href={a.href}
-              className="shrink-0 rounded-lg bg-indigo-600 text-white px-3.5 py-1.5 text-xs font-semibold hover:bg-indigo-500 transition-colors"
+              className="shrink-0 rounded-lg bg-red-600 text-white px-3.5 py-1.5 text-xs font-semibold hover:bg-red-500 transition-colors"
             >
               {a.botao} →
             </Link>

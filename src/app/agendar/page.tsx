@@ -22,7 +22,7 @@ export default async function AgendarPublicoPage({
           </p>
           <a
             href="/agendar"
-            className="inline-block mt-6 text-sm text-indigo-600 font-semibold hover:underline"
+            className="inline-block mt-6 text-sm text-red-600 font-semibold hover:underline"
           >
             Fazer outra solicitação
           </a>
@@ -35,7 +35,7 @@ export default async function AgendarPublicoPage({
     <main className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-lg mx-auto">
         <div className="flex items-center gap-2.5 mb-6 justify-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-black shadow-md">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-700 text-white font-black shadow-md">
             AI
           </span>
           <span className="font-bold text-slate-900">Super Visão Fortaleza</span>

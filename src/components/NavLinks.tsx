@@ -57,7 +57,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
               </span>
               {n.label}
               <span
-                className={`mt-0.5 h-0.5 w-6 rounded-full ${active ? "bg-indigo-400" : "bg-transparent"}`}
+                className={`mt-0.5 h-0.5 w-6 rounded-full ${active ? "bg-red-500" : "bg-transparent"}`}
               />
             </Link>
           );

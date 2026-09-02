@@ -25,7 +25,7 @@ export function Stepper({
                   done
                     ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/30"
                     : active
-                      ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30 ring-4 ring-indigo-100"
+                      ? "bg-red-600 text-white shadow-sm shadow-red-600/30 ring-4 ring-red-100"
                       : "bg-slate-100 text-slate-400"
                 }`}
               >

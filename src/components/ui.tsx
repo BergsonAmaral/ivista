@@ -44,7 +44,7 @@ export function Alert({
   const styles = {
     erro: "bg-red-50 border-red-200 text-red-700",
     ok: "bg-emerald-50 border-emerald-200 text-emerald-700",
-    info: "bg-indigo-50 border-indigo-200 text-indigo-700",
+    info: "bg-blue-50 border-blue-200 text-blue-700",
   }[tipo];
   return <div className={`rounded-xl border text-sm p-3.5 mb-4 ${styles}`}>{children}</div>;
 }
@@ -88,8 +88,8 @@ export function Badge({ status }: { status: string }) {
 }
 
 export const inputCls =
-  "w-full rounded-xl border border-zinc-300 px-3.5 py-2.5 text-sm bg-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-shadow";
+  "w-full rounded-xl border border-zinc-300 px-3.5 py-2.5 text-sm bg-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-400 transition-shadow";
 export const btnPrimary =
-  "rounded-xl bg-indigo-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-indigo-500 active:bg-indigo-700 shadow-sm shadow-indigo-600/20 disabled:opacity-40 disabled:shadow-none transition-colors";
+  "rounded-xl bg-red-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-red-500 active:bg-red-700 shadow-sm shadow-red-600/20 disabled:opacity-40 disabled:shadow-none transition-colors";
 export const btnSecondary =
   "rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-zinc-50 transition-colors";
