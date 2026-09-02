@@ -1,18 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Card, PageTitle, Badge } from "@/components/ui";
-
-const FASES = [
-  { n: 1, nome: "Agendamento", desc: "Agenda unificada", href: "/agendamentos", cor: "from-sky-500 to-blue-600" },
-  { n: 2, nome: "Roteirização", desc: "Rotas do dia", href: "/rotas", cor: "from-indigo-500 to-violet-600" },
-  { n: 3, nome: "Coleta", desc: "Checklist de chegada", href: "/vistorias", cor: "from-cyan-500 to-teal-600" },
-  { n: 4, nome: "Consulta", desc: "Fila automática c/ retry", href: "/vistorias", cor: "from-amber-500 to-orange-600" },
-  { n: 5, nome: "Vistoria", desc: "Fotos + condições", href: "/vistorias", cor: "from-fuchsia-500 to-pink-600" },
-  { n: 6, nome: "Envio", desc: "Trava de campos", href: "/vistorias", cor: "from-rose-500 to-red-600" },
-  { n: 7, nome: "Conferência", desc: "Auditoria assistida", href: "/conferencia", cor: "from-violet-500 to-purple-600" },
-  { n: 8, nome: "Entrega", desc: "Link seguro ao cliente", href: "/entregas", cor: "from-emerald-500 to-green-600" },
-];
+import { Card, Badge } from "@/components/ui";
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -23,23 +12,15 @@ export default async function Dashboard() {
   } = await supabase.auth.getUser();
   const { data: me } = await supabase
     .from("profiles")
-    .select("role")
+    .select("nome, role")
     .eq("id", user!.id)
     .maybeSingle();
   if (me?.role === "vistoriador") redirect("/vistorias");
 
   const hoje = new Date().toISOString().slice(0, 10);
 
-  const [agendamentos, vistoriasAtivas, conferenciasPend, entregasPend, consultasFalha] =
+  const [conferenciasPend, entregasPend, { count: rotasHoje }, consultasFalha] =
     await Promise.all([
-      supabase
-        .from("agendamentos")
-        .select("id", { count: "exact", head: true })
-        .in("status", ["solicitado", "confirmado"]),
-      supabase
-        .from("vistorias")
-        .select("id", { count: "exact", head: true })
-        .in("status", ["aguardando", "coleta", "em_vistoria"]),
       supabase
         .from("vistorias")
         .select("id", { count: "exact", head: true })
@@ -49,15 +30,14 @@ export default async function Dashboard() {
         .select("id", { count: "exact", head: true })
         .eq("status", "pendente"),
       supabase
+        .from("rotas")
+        .select("id", { count: "exact", head: true })
+        .eq("data", hoje),
+      supabase
         .from("consultas_veiculares")
         .select("id", { count: "exact", head: true })
         .eq("status", "falha"),
     ]);
-
-  const { count: rotasHoje } = await supabase
-    .from("rotas")
-    .select("id", { count: "exact", head: true })
-    .eq("data", hoje);
 
   // Fila de trabalho: o que está parado esperando ação humana
   const [{ data: filaRoteirizar }, { data: filaConferir }, { data: filaEntregar }] =
@@ -118,45 +98,93 @@ export default async function Dashboard() {
     })),
   ];
 
-  const cards = [
-    { label: "A roteirizar", valor: agendamentos.count ?? 0, href: "/agendamentos", cor: "text-sky-600" },
-    { label: "Rotas hoje", valor: rotasHoje ?? 0, href: "/rotas", cor: "text-indigo-600" },
-    { label: "Em campo", valor: vistoriasAtivas.count ?? 0, href: "/vistorias", cor: "text-amber-600" },
-    { label: "Em conferência", valor: conferenciasPend.count ?? 0, href: "/conferencia", cor: "text-violet-600" },
-    { label: "Entregas pendentes", valor: entregasPend.count ?? 0, href: "/entregas", cor: "text-emerald-600" },
-    { label: "Consultas com falha", valor: consultasFalha.count ?? 0, href: "/vistorias", cor: "text-red-600", alerta: true },
+  const primeiroNome = (me?.nome ?? "").split(" ")[0];
+  const dataLonga = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
+  const atalhos = [
+    {
+      href: "/agendamentos/novo",
+      titulo: "Agendar vistoria",
+      desc: "Registrar novo pedido",
+      icone: "📅",
+      destaque: true,
+    },
+    {
+      href: "/rotas",
+      titulo: "Rotas de hoje",
+      desc: `${rotasHoje ?? 0} rota(s) em campo`,
+      icone: "🗺️",
+    },
+    {
+      href: "/conferencia",
+      titulo: "Conferir laudos",
+      desc: `${conferenciasPend.count ?? 0} aguardando`,
+      icone: "🔍",
+    },
+    {
+      href: "/entregas",
+      titulo: "Entregas",
+      desc: `${entregasPend.count ?? 0} para enviar`,
+      icone: "📨",
+    },
   ];
 
   return (
-    <div>
-      <PageTitle
-        title="Painel operacional"
-        subtitle="Fluxo completo em 8 fases — do agendamento à entrega do laudo, sem gargalos"
-      />
+    <div className="max-w-3xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          Olá{primeiroNome ? `, ${primeiroNome}` : ""} 👋
+        </h1>
+        <p className="text-sm text-slate-500 capitalize">{dataLonga}</p>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-10">
-        {cards.map((c) => (
-          <Link key={c.label} href={c.href}>
-            <Card className="p-4 hover:-translate-y-0.5 hover:shadow-md transition-all h-full">
+      {/* Ações principais — botões grandes e diretos */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {atalhos.map((a) => (
+          <Link key={a.href + a.titulo} href={a.href}>
+            <div
+              className={`rounded-2xl p-4 h-full transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                a.destaque
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
+                  : "bg-white border border-zinc-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.06)]"
+              }`}
+            >
+              <div className="text-2xl mb-2">{a.icone}</div>
+              <div className={`font-bold text-sm ${a.destaque ? "" : "text-slate-900"}`}>
+                {a.titulo}
+              </div>
               <div
-                className={`text-3xl font-bold tabular-nums ${
-                  c.alerta && c.valor === 0 ? "text-slate-300" : c.cor
+                className={`text-xs mt-0.5 ${
+                  a.destaque ? "text-indigo-200" : "text-slate-500"
                 }`}
               >
-                {c.valor}
+                {a.desc}
               </div>
-              <div className="text-xs font-medium text-slate-500 mt-1">{c.label}</div>
-            </Card>
+            </div>
           </Link>
         ))}
       </div>
 
-      <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-        Precisa de você agora
+      {(consultasFalha.count ?? 0) > 0 && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm p-3.5">
+          ⚠ {consultasFalha.count} consulta(s) veicular(es) com falha —{" "}
+          <Link href="/vistorias" className="underline font-semibold">
+            verificar
+          </Link>
+        </div>
+      )}
+
+      {/* Fila de trabalho */}
+      <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+        Precisa de você agora {acoes.length > 0 && `(${acoes.length})`}
       </h2>
-      <Card className="mb-10 divide-y divide-zinc-100">
+      <Card className="divide-y divide-zinc-100">
         {acoes.length === 0 && (
-          <div className="p-6 text-center text-sm text-slate-400">
+          <div className="p-8 text-center text-sm text-slate-400">
             Tudo em dia — nenhuma ação pendente. 🎉
           </div>
         )}
@@ -177,29 +205,6 @@ export default async function Dashboard() {
           </div>
         ))}
       </Card>
-
-      <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-        As 8 fases do fluxo
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {FASES.map((f) => (
-          <Link key={f.n} href={f.href}>
-            <Card className="p-4 hover:-translate-y-0.5 hover:shadow-md transition-all h-full">
-              <div className="flex items-center gap-3">
-                <span
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${f.cor} text-white text-sm font-black shadow-sm`}
-                >
-                  {f.n}
-                </span>
-                <div>
-                  <div className="font-semibold text-sm text-slate-900">{f.nome}</div>
-                  <div className="text-xs text-slate-500">{f.desc}</div>
-                </div>
-              </div>
-            </Card>
-          </Link>
-        ))}
-      </div>
     </div>
   );
 }
