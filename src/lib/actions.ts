@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { geocodeEndereco } from "@/lib/geo";
 
 async function getSupabaseAndUser() {
   const supabase = await createClient();
@@ -65,7 +66,12 @@ export async function ensureProfile() {
   const novo = {
     id: user.id,
     nome: meta.nome ?? user.email?.split("@")[0] ?? "Usuário",
-    role: (meta.role ?? "atendente") as "admin" | "atendente" | "vistoriador" | "digitadora",
+    role: (meta.role ?? "atendente") as
+      | "admin"
+      | "atendente"
+      | "vistoriador"
+      | "digitadora"
+      | "cliente",
   };
   await supabase.from("profiles").upsert(novo, { onConflict: "id" });
   return { nome: novo.nome, role: novo.role };
@@ -102,9 +108,16 @@ export async function criarAgendamento(formData: FormData) {
     }
   }
 
+  const geo = await geocodeEndereco(
+    String(formData.get("endereco")),
+    formData.get("cidade") ? String(formData.get("cidade")) : null
+  );
+
   const { data: novo, error } = await supabase
     .from("agendamentos")
     .insert({
+      latitude: geo?.lat ?? null,
+      longitude: geo?.lng ?? null,
       canal: String(formData.get("canal") ?? "manual"),
       cliente_id: formData.get("cliente_id") || null,
       placa: placa || null,
@@ -151,10 +164,17 @@ export async function solicitarAgendamentoPublico(formData: FormData) {
     redirect(`/agendar?erro=${encodeURIComponent("Preencha todos os campos obrigatórios")}`);
   }
 
+  const geoPub = await geocodeEndereco(
+    endereco,
+    String(formData.get("cidade") ?? "") || null
+  );
+
   const admin = createAdminClient();
   const { error } = await admin.from("agendamentos").insert({
     canal: "portal",
     status: "solicitado",
+    latitude: geoPub?.lat ?? null,
+    longitude: geoPub?.lng ?? null,
     placa,
     modelo: String(formData.get("modelo") ?? "").trim() || null,
     endereco,
@@ -187,6 +207,79 @@ export async function criarCliente(formData: FormData) {
   });
   revalidatePath("/clientes");
   redirect("/clientes");
+}
+
+// Acesso de portal para a empresa cliente (login e senha) — admin/atendente
+export async function criarAcessoCliente(formData: FormData) {
+  const { supabase } = await getSupabaseAndUser();
+  const clienteId = String(formData.get("cliente_id"));
+  const email = String(formData.get("email")).trim().toLowerCase();
+  const senha = String(formData.get("senha"));
+
+  const { data: cliente } = await supabase
+    .from("clientes")
+    .select("nome")
+    .eq("id", clienteId)
+    .single();
+  if (!cliente) redirect("/clientes?erro=Cliente%20n%C3%A3o%20encontrado");
+
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password: senha,
+    email_confirm: true,
+    user_metadata: { nome: cliente.nome },
+  });
+  if (error || !data.user)
+    redirect(`/clientes?erro=${encodeURIComponent(error?.message ?? "falha ao criar acesso")}`);
+
+  await admin.from("profiles").upsert({
+    id: data.user.id,
+    nome: cliente.nome,
+    role: "cliente",
+    cliente_id: clienteId,
+  });
+  revalidatePath("/clientes");
+  redirect(`/clientes?ok=${encodeURIComponent(`Acesso criado para ${cliente.nome}`)}`);
+}
+
+// Agendamento feito pela empresa logada no portal
+export async function agendarPeloPortal(formData: FormData) {
+  const { supabase, user } = await getSupabaseAndUser();
+  const { data: me } = await supabase
+    .from("profiles")
+    .select("cliente_id, role")
+    .eq("id", user.id)
+    .single();
+  if (me?.role !== "cliente" || !me.cliente_id) redirect("/portal?erro=Acesso%20inv%C3%A1lido");
+
+  const placa = String(formData.get("placa") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const endereco = String(formData.get("endereco") ?? "").trim();
+  const dataAgendada = String(formData.get("data_agendada") ?? "");
+  if (placa.length < 7 || !endereco || !dataAgendada) {
+    redirect(`/portal?erro=${encodeURIComponent("Preencha placa, endereço e data")}`);
+  }
+
+  const geo = await geocodeEndereco(endereco, String(formData.get("cidade") ?? "") || null);
+
+  const { error } = await supabase.from("agendamentos").insert({
+    canal: "portal",
+    status: "solicitado",
+    cliente_id: me.cliente_id,
+    placa,
+    modelo: String(formData.get("modelo") ?? "").trim() || null,
+    endereco,
+    cidade: String(formData.get("cidade") ?? "").trim() || null,
+    data_agendada: dataAgendada,
+    contato_nome: String(formData.get("contato_nome") ?? "").trim() || null,
+    contato_telefone: String(formData.get("contato_telefone") ?? "").trim() || null,
+    observacoes: String(formData.get("observacoes") ?? "").trim() || null,
+    latitude: geo?.lat ?? null,
+    longitude: geo?.lng ?? null,
+  });
+  if (error) redirect(`/portal?erro=${encodeURIComponent(error.message)}`);
+  revalidatePath("/portal");
+  redirect("/portal?ok=1");
 }
 
 // ===== FASE 2: ROTEIRIZAÇÃO =====
@@ -510,11 +603,19 @@ export async function atualizarMembroEquipe(formData: FormData) {
     .single();
   if (me?.role !== "admin") redirect("/equipe?erro=Apenas%20administradores");
 
+  const enderecoBase = formData.get("endereco_base")
+    ? String(formData.get("endereco_base")).trim()
+    : null;
+  let baseGeo: { lat: number; lng: number } | null = null;
+  if (enderecoBase) baseGeo = await geocodeEndereco(enderecoBase, "Fortaleza");
+
   const { error } = await supabase
     .from("profiles")
     .update({
       role: String(formData.get("role")),
       ativo: formData.get("ativo") === "on",
+      endereco_base: enderecoBase,
+      ...(baseGeo ? { base_lat: baseGeo.lat, base_lng: baseGeo.lng } : {}),
     })
     .eq("id", String(formData.get("profile_id")));
   if (error) redirect(`/equipe?erro=${encodeURIComponent(error.message)}`);

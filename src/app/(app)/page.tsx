@@ -16,6 +16,7 @@ export default async function Dashboard() {
     .eq("id", user!.id)
     .maybeSingle();
   if (me?.role === "vistoriador") redirect("/vistorias");
+  if (me?.role === "cliente") redirect("/portal");
 
   const hoje = new Date().toISOString().slice(0, 10);
 

@@ -38,7 +38,7 @@ export default async function EquipePage({
 
   const { data: membros } = await supabase
     .from("profiles")
-    .select("id, nome, role, ativo, created_at")
+    .select("id, nome, role, ativo, created_at, endereco_base")
     .order("created_at");
 
   return (
@@ -114,6 +114,12 @@ export default async function EquipePage({
                 <input type="checkbox" name="ativo" defaultChecked={m.ativo} className="h-4 w-4" />
                 Ativo
               </label>
+              <input
+                name="endereco_base"
+                defaultValue={m.endereco_base ?? ""}
+                placeholder="Endereço base (casa) — usado na sugestão de rotas"
+                className={`${inputCls} flex-1 min-w-[220px]`}
+              />
               <button className={`${btnPrimary} ml-auto`}>Salvar</button>
             </form>
           </Card>

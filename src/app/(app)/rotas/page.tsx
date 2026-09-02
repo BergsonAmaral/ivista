@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { atribuirParada } from "@/lib/actions";
+import { haversineKm } from "@/lib/geo";
 import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
 
 export default async function RotasPage({
@@ -14,10 +15,16 @@ export default async function RotasPage({
   const [{ data: pendentes }, { data: vistoriadores }, { data: rotas }] = await Promise.all([
     supabase
       .from("agendamentos")
-      .select("id, placa, modelo, marca, endereco, cidade, complexidade, data_agendada, janela_inicio")
+      .select(
+        "id, placa, modelo, marca, endereco, cidade, complexidade, data_agendada, janela_inicio, latitude, longitude"
+      )
       .in("status", ["solicitado", "confirmado"])
       .order("data_agendada", { ascending: true, nullsFirst: false }),
-    supabase.from("profiles").select("id, nome").eq("role", "vistoriador").eq("ativo", true),
+    supabase
+      .from("profiles")
+      .select("id, nome, base_lat, base_lng")
+      .eq("role", "vistoriador")
+      .eq("ativo", true),
     supabase
       .from("rotas")
       .select(
@@ -25,6 +32,46 @@ export default async function RotasPage({
       )
       .eq("data", dataSel),
   ]);
+
+  // Sugestão por proximidade: posição atual = última parada do dia (ou base/casa)
+  const datasPendentes = [
+    ...new Set((pendentes ?? []).map((a) => a.data_agendada).filter(Boolean)),
+  ] as string[];
+  const { data: rotasGeo } = datasPendentes.length
+    ? await supabase
+        .from("rotas")
+        .select("vistoriador_id, data, rota_paradas(ordem, agendamentos(latitude, longitude))")
+        .in("data", datasPendentes)
+    : { data: [] };
+
+  function posicaoDoVistoriador(vId: string, data: string | null) {
+    const rota = (rotasGeo ?? []).find((r) => r.vistoriador_id === vId && r.data === data);
+    const paradas = ((rota?.rota_paradas ?? []) as unknown as {
+      ordem: number;
+      agendamentos: { latitude: number | null; longitude: number | null } | null;
+    }[])
+      .filter((p) => p.agendamentos?.latitude != null)
+      .sort((a, b) => b.ordem - a.ordem);
+    if (paradas.length) {
+      return { lat: paradas[0].agendamentos!.latitude!, lng: paradas[0].agendamentos!.longitude! };
+    }
+    const v = (vistoriadores ?? []).find((x) => x.id === vId);
+    if (v?.base_lat != null && v?.base_lng != null) return { lat: v.base_lat, lng: v.base_lng };
+    return null;
+  }
+
+  function sugestaoPara(a: { latitude: number | null; longitude: number | null; data_agendada: string | null }) {
+    if (a.latitude == null || a.longitude == null) return null;
+    const destino = { lat: a.latitude, lng: a.longitude };
+    let melhor: { id: string; nome: string; km: number } | null = null;
+    for (const v of vistoriadores ?? []) {
+      const pos = posicaoDoVistoriador(v.id, a.data_agendada);
+      if (!pos) continue;
+      const km = haversineKm(pos, destino);
+      if (!melhor || km < melhor.km) melhor = { id: v.id, nome: v.nome, km };
+    }
+    return melhor;
+  }
 
   return (
     <div>
@@ -48,7 +95,9 @@ export default async function RotasPage({
             A roteirizar ({pendentes?.length ?? 0})
           </h2>
           <div className="space-y-3">
-            {(pendentes ?? []).map((a) => (
+            {(pendentes ?? []).map((a) => {
+              const sugestao = sugestaoPara(a);
+              return (
               <Card key={a.id} className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -68,13 +117,24 @@ export default async function RotasPage({
                     </div>
                   </div>
                 </div>
+                {sugestao && (
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium px-2.5 py-1">
+                    📍 Mais próximo: <b>{sugestao.nome}</b> (~{sugestao.km.toFixed(1)} km)
+                  </div>
+                )}
                 <form action={atribuirParada} className="mt-3 flex flex-wrap items-center gap-2">
                   <input type="hidden" name="agendamento_id" value={a.id} />
-                  <select name="vistoriador_id" required className={`${inputCls} w-auto flex-1 min-w-[160px]`}>
+                  <select
+                    name="vistoriador_id"
+                    required
+                    defaultValue={sugestao?.id ?? ""}
+                    className={`${inputCls} w-auto flex-1 min-w-[160px]`}
+                  >
                     <option value="">Escolher vistoriador…</option>
                     {(vistoriadores ?? []).map((v) => (
                       <option key={v.id} value={v.id}>
                         {v.nome}
+                        {sugestao?.id === v.id ? " (sugerido)" : ""}
                       </option>
                     ))}
                   </select>
@@ -88,7 +148,8 @@ export default async function RotasPage({
                   <button className={btnPrimary}>Atribuir</button>
                 </form>
               </Card>
-            ))}
+              );
+            })}
             {!pendentes?.length && (
               <Card className="p-8 text-center text-zinc-400 text-sm">
                 Nada a roteirizar. Novos agendamentos aparecem aqui.
