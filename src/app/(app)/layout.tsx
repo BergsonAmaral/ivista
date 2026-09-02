@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { logout, ensureProfile } from "@/lib/actions";
 import { SideNav, BottomNav, type NavItem } from "@/components/NavLinks";
-import { LogOut } from "lucide-react";
+import { LogOut, KeyRound } from "lucide-react";
 
 // Cada função vê apenas as telas que usa — menos abas, menos confusão
 const NAV: (NavItem & { roles: string[] })[] = [
@@ -72,6 +72,13 @@ export default async function AppLayout({
               {ROLE_LABEL[profile?.role ?? ""] ?? ""}
             </div>
           </div>
+          <Link
+            href="/redefinir"
+            title="Trocar senha"
+            className="text-slate-400 hover:text-white transition-colors"
+          >
+            <KeyRound className="h-4 w-4" />
+          </Link>
           <form action={logout}>
             <button
               title="Sair"

@@ -103,7 +103,13 @@ export default async function LoginPage({
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-400 mt-5">
+          <a
+            href="/recuperar"
+            className="block text-center text-sm text-slate-500 mt-5 hover:text-red-600 transition-colors"
+          >
+            Esqueci minha senha
+          </a>
+          <p className="text-center text-xs text-slate-400 mt-3">
             Acessos são criados pelo administrador. Fale com a central.
           </p>
         </div>

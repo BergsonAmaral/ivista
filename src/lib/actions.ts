@@ -62,6 +62,21 @@ export async function ensureProfile() {
   return { nome: novo.nome, role: novo.role };
 }
 
+// Recuperação de senha: envia e-mail com link para /redefinir
+export async function recuperarSenha(formData: FormData) {
+  const email = String(formData.get("email")).trim().toLowerCase();
+  const origem = String(formData.get("origem") ?? "");
+  const supabase = await createClient();
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origem}/redefinir`,
+  });
+  // resposta neutra (não revela se o e-mail existe)
+  redirect(
+    "/recuperar?ok=" +
+      encodeURIComponent("Se este e-mail estiver cadastrado, você receberá o link de redefinição.")
+  );
+}
+
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
