@@ -23,16 +23,11 @@ export default async function LoginPage({
       <div className="hidden lg:flex flex-col justify-between bg-slate-900 text-white p-12 relative overflow-hidden">
         <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-red-600/30 blur-3xl" />
         <div className="absolute -bottom-40 -left-24 h-96 w-96 rounded-full bg-rose-600/20 blur-3xl" />
-        <div className="relative flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-700 font-black shadow-lg shadow-red-950/40">
-            AI
+        <div className="relative">
+          <span className="inline-block rounded-2xl bg-white px-5 py-4 shadow-lg shadow-black/30">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Super Visão — Vistorias Automotivas" className="h-11 w-auto" />
           </span>
-          <div className="font-bold text-lg leading-tight">
-            Super Visão Fortaleza
-            <span className="block text-xs font-medium text-slate-400">
-              Gestão de vistorias automotivas
-            </span>
-          </div>
         </div>
         <div className="relative">
           <h2 className="text-3xl font-bold leading-snug mb-6">
@@ -59,11 +54,9 @@ export default async function LoginPage({
       {/* Formulário */}
       <div className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
-          <div className="lg:hidden flex items-center gap-2.5 mb-8 justify-center">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-700 text-white font-black shadow-md">
-              AI
-            </span>
-            <span className="font-bold text-slate-900">Super Visão Fortaleza</span>
+          <div className="lg:hidden flex justify-center mb-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Super Visão — Vistorias Automotivas" className="h-12 w-auto" />
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">

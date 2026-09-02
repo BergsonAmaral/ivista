@@ -34,11 +34,9 @@ export default async function AgendarPublicoPage({
   return (
     <main className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-lg mx-auto">
-        <div className="flex items-center gap-2.5 mb-6 justify-center">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-700 text-white font-black shadow-md">
-            AI
-          </span>
-          <span className="font-bold text-slate-900">Super Visão Fortaleza</span>
+        <div className="flex justify-center mb-6">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Super Visão — Vistorias Automotivas" className="h-12 w-auto" />
         </div>
 
         <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">

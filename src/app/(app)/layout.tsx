@@ -48,15 +48,10 @@ export default async function AppLayout({
     <div className="min-h-screen bg-slate-50">
       {/* ===== Sidebar (desktop) ===== */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col bg-slate-900 text-white p-4">
-        <Link href="/" className="flex items-center gap-2.5 px-2 py-3 mb-4">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-700 font-black text-sm shadow-lg shadow-red-950/40">
-            AI
-          </span>
-          <span className="font-bold tracking-tight leading-tight">
-            Super Visão
-            <span className="block text-[10px] font-medium text-slate-400 tracking-wide uppercase">
-              Fortaleza · Vistorias
-            </span>
+        <Link href="/" className="block px-2 py-3 mb-4">
+          <span className="block rounded-2xl bg-white px-4 py-3.5 shadow-lg shadow-black/20">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Super Visão — Vistorias Automotivas" className="h-9 w-auto mx-auto" />
           </span>
         </Link>
 
@@ -86,11 +81,11 @@ export default async function AppLayout({
       {/* ===== Topo (mobile) ===== */}
       <header className="lg:hidden sticky top-0 z-20 bg-slate-900 text-white">
         <div className="flex items-center gap-3 h-14 px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-rose-700 font-black text-xs">
-              AI
+          <Link href="/" className="flex items-center">
+            <span className="rounded-xl bg-white px-2.5 py-1.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Super Visão" className="h-6 w-auto" />
             </span>
-            <span className="font-bold text-sm">Super Visão</span>
           </Link>
           <div className="ml-auto flex items-center gap-3">
             <span className="text-xs text-slate-400">{profile?.nome?.split(" ")[0]}</span>
