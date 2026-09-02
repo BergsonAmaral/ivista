@@ -5,7 +5,7 @@ import "./globals.css";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AI Super Visão Fortaleza — Gestão de Vistorias",
+  title: "Super Visão Fortaleza — Vistorias Automotivas",
   description: "Sistema operacional de vistorias automotivas",
 };
 

@@ -51,7 +51,10 @@ export default async function AppLayout({
         <Link href="/" className="block px-2 py-3 mb-4">
           <span className="block rounded-2xl bg-white px-4 py-3.5 shadow-lg shadow-black/20">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Super Visão — Vistorias Automotivas" className="h-9 w-auto mx-auto" />
+            <img src="/logo.png" alt="Super Visão Fortaleza — Vistorias Automotivas" className="h-9 w-auto mx-auto" />
+          </span>
+          <span className="block text-center text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-2">
+            Fortaleza · Ceará
           </span>
         </Link>
 
@@ -84,7 +87,10 @@ export default async function AppLayout({
           <Link href="/" className="flex items-center">
             <span className="rounded-xl bg-white px-2.5 py-1.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Super Visão" className="h-6 w-auto" />
+              <img src="/logo.png" alt="Super Visão Fortaleza" className="h-6 w-auto" />
+            </span>
+            <span className="ml-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              Fortaleza
             </span>
           </Link>
           <div className="ml-auto flex items-center gap-3">

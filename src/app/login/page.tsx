@@ -26,8 +26,11 @@ export default async function LoginPage({
         <div className="relative">
           <span className="inline-block rounded-2xl bg-white px-5 py-4 shadow-lg shadow-black/30">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Super Visão — Vistorias Automotivas" className="h-11 w-auto" />
+            <img src="/logo.png" alt="Super Visão Fortaleza — Vistorias Automotivas" className="h-11 w-auto" />
           </span>
+          <div className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400 mt-3">
+            Fortaleza · Ceará
+          </div>
         </div>
         <div className="relative">
           <h2 className="text-3xl font-bold leading-snug mb-6">
@@ -54,9 +57,12 @@ export default async function LoginPage({
       {/* Formulário */}
       <div className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
-          <div className="lg:hidden flex justify-center mb-8">
+          <div className="lg:hidden text-center mb-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Super Visão — Vistorias Automotivas" className="h-12 w-auto" />
+            <img src="/logo.png" alt="Super Visão Fortaleza — Vistorias Automotivas" className="h-12 w-auto mx-auto" />
+            <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 mt-2">
+              Fortaleza · Ceará
+            </div>
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
