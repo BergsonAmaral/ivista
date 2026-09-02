@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageTitle, Badge } from "@/components/ui";
 
@@ -15,6 +16,18 @@ const FASES = [
 
 export default async function Dashboard() {
   const supabase = await createClient();
+
+  // Vistoriador vai direto para o seu trabalho — o painel é da operação interna
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: me } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user!.id)
+    .maybeSingle();
+  if (me?.role === "vistoriador") redirect("/vistorias");
+
   const hoje = new Date().toISOString().slice(0, 10);
 
   const [agendamentos, vistoriasAtivas, conferenciasPend, entregasPend, consultasFalha] =

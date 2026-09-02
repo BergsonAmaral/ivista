@@ -3,15 +3,16 @@ import { createClient } from "@/lib/supabase/server";
 import { logout, ensureProfile } from "@/lib/actions";
 import { NavLinks } from "@/components/NavLinks";
 
-const NAV = [
-  { href: "/", label: "Painel" },
-  { href: "/agendamentos", label: "Agendamentos" },
-  { href: "/rotas", label: "Rotas" },
-  { href: "/vistorias", label: "Vistorias" },
-  { href: "/conferencia", label: "Conferência" },
-  { href: "/entregas", label: "Entregas" },
-  { href: "/clientes", label: "Clientes" },
-  { href: "/equipe", label: "Equipe", adminOnly: true },
+// Cada função vê apenas as telas que usa — menos abas, menos confusão
+const NAV: { href: string; label: string; roles: string[] }[] = [
+  { href: "/", label: "Painel", roles: ["admin", "atendente", "digitadora"] },
+  { href: "/agendamentos", label: "Agendamentos", roles: ["admin", "atendente"] },
+  { href: "/rotas", label: "Rotas", roles: ["admin", "atendente"] },
+  { href: "/vistorias", label: "Vistorias", roles: ["admin", "vistoriador"] },
+  { href: "/conferencia", label: "Conferência", roles: ["admin", "digitadora"] },
+  { href: "/entregas", label: "Entregas", roles: ["admin", "digitadora", "atendente"] },
+  { href: "/clientes", label: "Clientes", roles: ["admin", "atendente"] },
+  { href: "/equipe", label: "Equipe", roles: ["admin"] },
 ];
 
 const ROLE_LABEL: Record<string, string> = {
@@ -55,7 +56,9 @@ export default async function AppLayout({
             </span>
           </Link>
           <NavLinks
-            items={NAV.filter((n) => !n.adminOnly || profile?.role === "admin")}
+            items={NAV.filter((n) => n.roles.includes(profile?.role ?? "atendente")).map(
+              ({ href, label }) => ({ href, label })
+            )}
           />
           <div className="ml-auto flex items-center gap-3 shrink-0">
             <div className="hidden md:block text-right leading-tight">
