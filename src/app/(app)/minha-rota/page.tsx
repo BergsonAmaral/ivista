@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageTitle, Badge } from "@/components/ui";
 import { MapPin, Clock, ChevronRight } from "lucide-react";
+import { LocationTracker } from "@/components/LocationTracker";
 
 // Tela do vistoriador: a rota DELE, dia a dia, com as paradas em ordem.
 export default async function MinhaRotaPage() {
@@ -47,6 +48,9 @@ export default async function MinhaRotaPage() {
         title="Minha rota"
         subtitle={`Olá, ${me?.nome?.split(" ")[0]} — suas vistorias em ordem de parada`}
       />
+      <div className="mb-4">
+        <LocationTracker />
+      </div>
 
       {(rotas ?? []).map((r) => {
         const paradas = (r.rota_paradas ?? []).sort((a, b) => a.ordem - b.ordem);

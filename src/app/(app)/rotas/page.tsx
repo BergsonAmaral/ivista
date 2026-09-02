@@ -4,6 +4,7 @@ import { haversineKm } from "@/lib/geo";
 import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
 import { MapPin, Clock } from "lucide-react";
 import { RouteMap, type MapPonto, type MapLinha } from "@/components/RouteMap";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 // Uma cor por vistoriador (marcadores do mapa e cabeçalho do cartão)
 const CORES = ["#dc2626", "#2563eb", "#059669", "#d97706", "#7c3aed", "#0891b2"];
@@ -27,7 +28,7 @@ export default async function RotasPage({
       .order("data_agendada", { ascending: true, nullsFirst: false }),
     supabase
       .from("profiles")
-      .select("id, nome, base_lat, base_lng")
+      .select("id, nome, base_lat, base_lng, ultima_lat, ultima_lng, localizacao_em")
       .eq("role", "vistoriador")
       .eq("ativo", true)
       .order("nome"),
@@ -130,6 +131,27 @@ export default async function RotasPage({
     }
     if (coords.length > 1) linhas.push({ cor, coords });
   }
+  // posição AO VIVO dos vistoriadores (últimos 15 minutos)
+  const agora = Date.now();
+  for (const v of vistoriadores ?? []) {
+    if (
+      v.ultima_lat != null &&
+      v.ultima_lng != null &&
+      v.localizacao_em &&
+      agora - new Date(v.localizacao_em).getTime() < 15 * 60_000
+    ) {
+      const min = Math.max(0, Math.round((agora - new Date(v.localizacao_em).getTime()) / 60_000));
+      pontos.push({
+        lat: v.ultima_lat,
+        lng: v.ultima_lng,
+        cor: corDoVistoriador.get(v.id) ?? "#64748b",
+        rotulo: "",
+        titulo: `${v.nome} — ao vivo (há ${min} min)`,
+        pulso: true,
+      });
+    }
+  }
+
   for (const a of pendentes ?? []) {
     if (a.latitude != null && a.longitude != null && a.data_agendada === dataSel) {
       pontos.push({
@@ -160,7 +182,12 @@ export default async function RotasPage({
       </form>
 
       <div className="mb-6">
+        <AutoRefresh segundos={30} />
         <RouteMap pontos={pontos} linhas={linhas} />
+        <p className="text-[11px] text-slate-400 mt-1.5">
+          ⌂ base do vistoriador · números = ordem das paradas · ponto pulsante = posição ao
+          vivo (atualiza a cada 30s) · cinza “?” = ainda sem vistoriador
+        </p>
       </div>
 
       {/* ===== A distribuir ===== */}

@@ -24,3 +24,9 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ponto pulsante da localização ao vivo no mapa */
+@keyframes vista-pulse {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(2.6); opacity: 0; }
+}

@@ -9,6 +9,7 @@ export type MapPonto = {
   cor: string; // cor do vistoriador (hex)
   rotulo: string; // texto do marcador (nº da parada ou "?")
   titulo: string; // tooltip
+  pulso?: boolean; // posição ao vivo (ponto pulsante)
 };
 
 export type MapLinha = { cor: string; coords: [number, number][] };
@@ -69,11 +70,17 @@ export function RouteMap({
       }
       for (const p of pontos) {
         bounds.push([p.lat, p.lng]);
+        const html = p.pulso
+          ? `<div style="position:relative;width:22px;height:22px">
+               <div style="position:absolute;inset:0;border-radius:9999px;background:${p.cor};opacity:.45;animation:vista-pulse 1.6s ease-out infinite"></div>
+               <div style="position:absolute;inset:4px;border-radius:9999px;background:${p.cor};border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>
+             </div>`
+          : `<div style="background:${p.cor};color:#fff;width:26px;height:26px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)">${p.rotulo}</div>`;
         const icon = L.divIcon({
           className: "",
-          html: `<div style="background:${p.cor};color:#fff;width:26px;height:26px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)">${p.rotulo}</div>`,
-          iconSize: [26, 26],
-          iconAnchor: [13, 13],
+          html,
+          iconSize: p.pulso ? [22, 22] : [26, 26],
+          iconAnchor: p.pulso ? [11, 11] : [13, 13],
         });
         L.marker([p.lat, p.lng], { icon }).addTo(map).bindTooltip(p.titulo);
       }
