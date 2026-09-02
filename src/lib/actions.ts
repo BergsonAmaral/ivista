@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 async function getSupabaseAndUser() {
   const supabase = await createClient();
@@ -441,6 +441,35 @@ export async function concluirConferencia(formData: FormData) {
 }
 
 // ===== EQUIPE (admin) =====
+export async function criarMembroEquipe(formData: FormData) {
+  const { supabase, user } = await getSupabaseAndUser();
+  const { data: me } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (me?.role !== "admin") redirect("/equipe?erro=Apenas%20administradores");
+
+  const nome = String(formData.get("nome"));
+  const email = String(formData.get("email")).trim().toLowerCase();
+  const senha = String(formData.get("senha"));
+  const role = String(formData.get("role"));
+
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password: senha,
+    email_confirm: true,
+    user_metadata: { nome },
+  });
+  if (error || !data.user)
+    redirect(`/equipe?erro=${encodeURIComponent(error?.message ?? "falha ao criar usuário")}`);
+
+  await admin.from("profiles").upsert({ id: data.user.id, nome, role });
+  revalidatePath("/equipe");
+  redirect(`/equipe?ok=${encodeURIComponent(`${nome} criado como ${role}`)}`);
+}
+
 export async function atualizarMembroEquipe(formData: FormData) {
   const { supabase, user } = await getSupabaseAndUser();
   const { data: me } = await supabase

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { atualizarMembroEquipe } from "@/lib/actions";
+import { atualizarMembroEquipe, criarMembroEquipe } from "@/lib/actions";
 import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
 
 const ROLES = [
@@ -12,9 +12,9 @@ const ROLES = [
 export default async function EquipePage({
   searchParams,
 }: {
-  searchParams: Promise<{ erro?: string }>;
+  searchParams: Promise<{ erro?: string; ok?: string }>;
 }) {
-  const { erro } = await searchParams;
+  const { erro, ok } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,7 +48,38 @@ export default async function EquipePage({
         subtitle="Novos cadastros entram como Atendente — defina aqui a função real de cada pessoa e ative/desative acessos"
       />
       {erro && <Alert tipo="erro">{erro}</Alert>}
+      {ok && <Alert tipo="ok">{ok}</Alert>}
 
+      <Card className="p-5 mb-6">
+        <h2 className="font-semibold text-sm mb-1">Cadastrar novo membro</h2>
+        <p className="text-xs text-slate-500 mb-3">
+          Crie o acesso direto: a pessoa entra com o e-mail e a senha provisória que você definir
+          (e pode trocar depois).
+        </p>
+        <form action={criarMembroEquipe} className="grid sm:grid-cols-2 gap-3">
+          <input name="nome" required placeholder="Nome completo *" className={inputCls} />
+          <input name="email" type="email" required placeholder="E-mail *" className={inputCls} />
+          <input
+            name="senha"
+            required
+            minLength={6}
+            placeholder="Senha provisória * (mín. 6)"
+            className={inputCls}
+          />
+          <select name="role" required defaultValue="vistoriador" className={inputCls}>
+            {ROLES.map((r) => (
+              <option key={r.valor} value={r.valor}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+          <button className={`${btnPrimary} sm:col-span-2`}>Criar acesso</button>
+        </form>
+      </Card>
+
+      <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+        Membros
+      </h2>
       <div className="space-y-3">
         {(membros ?? []).map((m) => (
           <Card key={m.id} className="p-4">
