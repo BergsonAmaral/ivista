@@ -9,6 +9,8 @@ const NAV: (NavItem & { roles: string[] })[] = [
   { href: "/agendamentos", label: "Agendamentos", icon: "agenda", section: "Operação", roles: ["admin", "atendente", "digitadora"] },
   { href: "/rotas", label: "Rotas", icon: "rotas", section: "Operação", roles: ["admin", "atendente", "digitadora"] },
   { href: "/minha-rota", label: "Minha rota", icon: "rotas", roles: ["vistoriador"] },
+  { href: "/conferencia", label: "Conferência", icon: "conferencia", section: "Operação", roles: ["admin", "digitadora"] },
+  { href: "/entregas", label: "Entregas", icon: "entregas", section: "Operação", roles: ["admin", "digitadora"] },
   { href: "/clientes", label: "Empresas", icon: "clientes", section: "Cadastros", roles: ["admin", "atendente"] },
   { href: "/equipe", label: "Vistoriadores", icon: "equipe", section: "Cadastros", roles: ["admin"] },
   { href: "/portal", label: "Portal", icon: "portal", roles: ["cliente"] },

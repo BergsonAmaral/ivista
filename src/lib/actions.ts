@@ -26,27 +26,12 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-  const supabase = await createClient();
-  const nome = String(formData.get("nome"));
-  // Função é definida pelo admin na tela Equipe — cadastro entra como 'atendente'
-  const role = "atendente";
-  const { data, error } = await supabase.auth.signUp({
-    email: String(formData.get("email")),
-    password: String(formData.get("password")),
-    options: { data: { nome, role } },
-  });
-  if (error || !data.user)
-    redirect(`/login?erro=${encodeURIComponent(error?.message ?? "falha no cadastro")}`);
-  if (!data.session)
-    redirect(
-      `/login?erro=${encodeURIComponent(
-        "Conta criada! Confirme o e-mail recebido antes de entrar (ou desative a confirmação de e-mail no Supabase)."
-      )}`
-    );
-  await supabase
-    .from("profiles")
-    .upsert({ id: data.user.id, nome, role }, { onConflict: "id" });
-  redirect("/");
+  // Cadastro público DESATIVADO: acessos são criados pelo admin (Equipe/Empresas)
+  void formData;
+  redirect(
+    "/login?erro=" +
+      encodeURIComponent("Cadastro público desativado. Fale com o administrador.")
+  );
 }
 
 // Garante que o perfil exista (fallback quando o signup ocorreu sem sessão)
@@ -362,6 +347,19 @@ export async function atribuirParada(formData: FormData) {
     String(formData.get("data"))
   );
   if (erro) redirect(`/rotas?erro=${encodeURIComponent(erro)}`);
+}
+
+// Check simples de conclusão da visita (fase 1 do lançamento, sem o laudo digital)
+export async function concluirVisita(agendamentoId: string) {
+  const { supabase } = await getSupabaseAndUser();
+  const { error } = await supabase
+    .from("agendamentos")
+    .update({ status: "concluido" })
+    .eq("id", agendamentoId);
+  if (error) redirect(`/minha-rota?erro=${encodeURIComponent(error.message)}`);
+  revalidatePath("/minha-rota");
+  revalidatePath("/rotas");
+  revalidatePath("/agendamentos");
 }
 
 // ===== FASE 3: COLETA (dispara a consulta da Fase 4 ao confirmar presença) =====

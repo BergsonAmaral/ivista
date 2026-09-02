@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageTitle, Badge } from "@/components/ui";
-import { MapPin, Clock, ChevronRight } from "lucide-react";
+import { concluirVisita } from "@/lib/actions";
+import { MapPin, Clock, ChevronRight, CheckCircle2 } from "lucide-react";
 import { LocationTracker } from "@/components/LocationTracker";
 
 // Tela do vistoriador: a rota DELE, dia a dia, com as paradas em ordem.
@@ -22,7 +23,7 @@ export default async function MinhaRotaPage() {
   const { data: rotas } = await supabase
     .from("rotas")
     .select(
-      "id, data, rota_paradas(id, ordem, tempo_estimado_min, agendamentos(id, placa, marca, modelo, endereco, cidade, janela_inicio, contato_nome, contato_telefone))"
+      "id, data, rota_paradas(id, ordem, tempo_estimado_min, agendamentos(id, placa, marca, modelo, endereco, cidade, janela_inicio, contato_nome, contato_telefone, status))"
     )
     .eq("vistoriador_id", user!.id)
     .gte("data", hoje)
@@ -79,46 +80,69 @@ export default async function MinhaRotaPage() {
                   id: string; placa: string; marca: string; modelo: string;
                   endereco: string; cidade: string; janela_inicio: string | null;
                   contato_nome: string | null; contato_telefone: string | null;
+                  status: string;
                 };
                 const vistoria = vistoriaPorAg.get(ag?.id);
+                const concluida = ag?.status === "concluido";
                 return (
-                  <Link
+                  <Card
                     key={p.id}
-                    href={vistoria ? `/vistorias/${vistoria.id}` : "#"}
-                    className="block"
+                    className={`p-4 ${
+                      concluida ? "opacity-80 bg-emerald-50/40 border-emerald-200" : ""
+                    }`}
                   >
-                    <Card className="p-4 hover:-translate-y-0.5 hover:shadow-md transition-all">
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-600 text-white text-sm font-black">
-                          {p.ordem}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-mono font-bold">{ag?.placa}</span>
-                            <span className="text-sm text-slate-500">
-                              {[ag?.marca, ag?.modelo].filter(Boolean).join(" ")}
-                            </span>
-                            {vistoria && <Badge status={vistoria.status} />}
-                          </div>
-                          <div className="flex items-center gap-1 text-sm text-slate-500 truncate">
-                            <MapPin className="h-3.5 w-3.5 shrink-0" />
-                            {ag?.endereco}
-                            {ag?.cidade ? `, ${ag.cidade}` : ""}
-                          </div>
-                          <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />~{p.tempo_estimado_min} min
-                            </span>
-                            {ag?.janela_inicio && (
-                              <span>janela {String(ag.janela_inicio).slice(0, 5)}</span>
-                            )}
-                            {ag?.contato_nome && <span>contato: {ag.contato_nome}</span>}
-                          </div>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white text-sm font-black ${
+                          concluida ? "bg-emerald-600" : "bg-red-600"
+                        }`}
+                      >
+                        {concluida ? "✓" : p.ordem}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono font-bold">{ag?.placa}</span>
+                          <span className="text-sm text-slate-500">
+                            {[ag?.marca, ag?.modelo].filter(Boolean).join(" ")}
+                          </span>
+                          {vistoria && !concluida && <Badge status={vistoria.status} />}
+                          {concluida && <Badge status="concluido" />}
                         </div>
-                        <ChevronRight className="h-5 w-5 text-slate-300 shrink-0" />
+                        <div className="flex items-center gap-1 text-sm text-slate-500 truncate">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          {ag?.endereco}
+                          {ag?.cidade ? `, ${ag.cidade}` : ""}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />~{p.tempo_estimado_min} min
+                          </span>
+                          {ag?.janela_inicio && (
+                            <span>janela {String(ag.janela_inicio).slice(0, 5)}</span>
+                          )}
+                          {ag?.contato_nome && <span>contato: {ag.contato_nome}</span>}
+                        </div>
                       </div>
-                    </Card>
-                  </Link>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {!concluida && (
+                          <form action={concluirVisita.bind(null, ag.id)}>
+                            <button className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 text-white px-3 py-2 text-xs font-semibold hover:bg-emerald-500 transition-colors">
+                              <CheckCircle2 className="h-4 w-4" /> Concluir
+                            </button>
+                          </form>
+                        )}
+                        {vistoria && (
+                          <Link
+                            href={`/vistorias/${vistoria.id}`}
+                            title="Abrir vistoria detalhada"
+                            className="text-slate-300 hover:text-slate-500"
+                          >
+                            <ChevronRight className="h-5 w-5" />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
                 );
               })}
             </div>

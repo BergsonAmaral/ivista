@@ -35,7 +35,7 @@ export default async function RotasPage({
     supabase
       .from("rotas")
       .select(
-        "id, data, vistoriador_id, rota_paradas(id, ordem, tempo_estimado_min, agendamentos(placa, endereco, cidade, latitude, longitude, janela_inicio))"
+        "id, data, vistoriador_id, rota_paradas(id, ordem, tempo_estimado_min, agendamentos(placa, endereco, cidade, latitude, longitude, janela_inicio, status))"
       )
       .eq("data", dataSel),
   ]);
@@ -94,6 +94,7 @@ export default async function RotasPage({
     agendamentos: {
       placa: string; endereco: string; cidade: string | null;
       latitude: number | null; longitude: number | null; janela_inicio: string | null;
+      status?: string;
     } | null;
   };
   const pontos: MapPonto[] = [];
@@ -289,9 +290,12 @@ export default async function RotasPage({
                     <li key={p.id} className="flex items-start gap-2.5 text-sm">
                       <span
                         className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white text-[11px] font-black mt-0.5"
-                        style={{ backgroundColor: cor }}
+                        style={{
+                          backgroundColor:
+                            p.agendamentos?.status === "concluido" ? "#059669" : cor,
+                        }}
                       >
-                        {p.ordem}
+                        {p.agendamentos?.status === "concluido" ? "✓" : p.ordem}
                       </span>
                       <div className="min-w-0">
                         <span className="font-mono font-semibold">

@@ -103,12 +103,9 @@ export default async function LoginPage({
             </button>
           </form>
 
-          <a
-            href={cadastro ? "/login" : "/login?modo=cadastro"}
-            className="block text-center text-sm text-slate-500 mt-5 hover:text-red-600 transition-colors"
-          >
-            {cadastro ? "Já tenho conta — entrar" : "Não tem conta? Criar nova conta"}
-          </a>
+          <p className="text-center text-xs text-slate-400 mt-5">
+            Acessos são criados pelo administrador. Fale com a central.
+          </p>
         </div>
       </div>
     </main>
