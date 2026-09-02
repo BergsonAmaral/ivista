@@ -139,6 +139,37 @@ export async function criarAgendamento(formData: FormData) {
   redirect("/agendamentos");
 }
 
+// Agendamento PÚBLICO (canal portal): sem login, entra como "solicitado"
+export async function solicitarAgendamentoPublico(formData: FormData) {
+  const placa = String(formData.get("placa") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const endereco = String(formData.get("endereco") ?? "").trim();
+  const contatoNome = String(formData.get("contato_nome") ?? "").trim();
+  const contatoTel = String(formData.get("contato_telefone") ?? "").trim();
+  const dataAgendada = String(formData.get("data_agendada") ?? "");
+
+  if (placa.length < 7 || !endereco || !contatoNome || !contatoTel || !dataAgendada) {
+    redirect(`/agendar?erro=${encodeURIComponent("Preencha todos os campos obrigatórios")}`);
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("agendamentos").insert({
+    canal: "portal",
+    status: "solicitado",
+    placa,
+    modelo: String(formData.get("modelo") ?? "").trim() || null,
+    endereco,
+    cidade: String(formData.get("cidade") ?? "").trim() || null,
+    data_agendada: dataAgendada,
+    contato_nome: contatoNome,
+    contato_telefone: contatoTel,
+    observacoes: String(formData.get("observacoes") ?? "").trim() || null,
+  });
+  if (error) redirect(`/agendar?erro=${encodeURIComponent("Não foi possível registrar. Tente novamente.")}`);
+  revalidatePath("/");
+  revalidatePath("/agendamentos");
+  redirect("/agendar?ok=1");
+}
+
 export async function cancelarAgendamento(id: string) {
   const { supabase } = await getSupabaseAndUser();
   await supabase.from("agendamentos").update({ status: "cancelado" }).eq("id", id);
