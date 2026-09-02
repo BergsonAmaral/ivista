@@ -3,7 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, PageTitle, Badge, btnPrimary } from "@/components/ui";
 import { cancelarAgendamento } from "@/lib/actions";
 
-export default async function AgendamentosPage() {
+export default async function AgendamentosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ok?: string }>;
+}) {
+  const { ok } = await searchParams;
   const supabase = await createClient();
   const { data: agendamentos } = await supabase
     .from("agendamentos")
@@ -25,6 +30,11 @@ export default async function AgendamentosPage() {
         }
       />
 
+      {ok && (
+        <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm p-3.5">
+          {ok}
+        </div>
+      )}
       <Card className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -61,9 +71,15 @@ export default async function AgendamentosPage() {
                 <td className="px-4 py-3">
                   <Badge status={a.status} />
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <Link
+                    href={`/agendamentos/${a.id}/editar`}
+                    className="text-xs text-slate-500 hover:text-red-600 font-medium mr-3"
+                  >
+                    Editar
+                  </Link>
                   {(a.status === "solicitado" || a.status === "confirmado") && (
-                    <form action={cancelarAgendamento.bind(null, a.id)}>
+                    <form action={cancelarAgendamento.bind(null, a.id)} className="inline">
                       <button className="text-xs text-red-500 hover:underline">Cancelar</button>
                     </form>
                   )}

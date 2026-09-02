@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { atribuirParada } from "@/lib/actions";
+import { atribuirParada, desatribuirParada } from "@/lib/actions";
 import { haversineKm } from "@/lib/geo";
 import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
 import { MapPin, Clock } from "lucide-react";
@@ -35,7 +35,7 @@ export default async function RotasPage({
     supabase
       .from("rotas")
       .select(
-        "id, data, vistoriador_id, rota_paradas(id, ordem, tempo_estimado_min, agendamentos(placa, endereco, cidade, latitude, longitude, janela_inicio, status))"
+        "id, data, vistoriador_id, rota_paradas(id, ordem, tempo_estimado_min, agendamento_id, agendamentos(placa, endereco, cidade, latitude, longitude, janela_inicio, status))"
       )
       .eq("data", dataSel),
   ]);
@@ -91,6 +91,7 @@ export default async function RotasPage({
   // ===== dados do mapa (dia selecionado + pendentes) =====
   type Parada = {
     id: string; ordem: number; tempo_estimado_min: number;
+    agendamento_id?: string;
     agendamentos: {
       placa: string; endereco: string; cidade: string | null;
       latitude: number | null; longitude: number | null; janela_inicio: string | null;
@@ -297,7 +298,7 @@ export default async function RotasPage({
                       >
                         {p.agendamentos?.status === "concluido" ? "✓" : p.ordem}
                       </span>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <span className="font-mono font-semibold">
                           {p.agendamentos?.placa}
                         </span>
@@ -311,6 +312,16 @@ export default async function RotasPage({
                           {p.agendamentos?.endereco}
                         </div>
                       </div>
+                      {p.agendamentos?.status !== "concluido" && p.agendamento_id && (
+                        <form action={desatribuirParada.bind(null, p.agendamento_id)}>
+                          <button
+                            title="Remover da rota (volta para A distribuir)"
+                            className="text-slate-300 hover:text-red-500 text-sm font-bold px-1"
+                          >
+                            ×
+                          </button>
+                        </form>
+                      )}
                     </li>
                   ))}
                 </ol>

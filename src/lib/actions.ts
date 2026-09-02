@@ -190,6 +190,100 @@ export async function solicitarAgendamentoPublico(formData: FormData) {
   redirect("/agendar?ok=1");
 }
 
+export async function atualizarAgendamento(formData: FormData) {
+  const { supabase } = await getSupabaseAndUser();
+  const id = String(formData.get("agendamento_id"));
+  const endereco = String(formData.get("endereco"));
+  const cidade = formData.get("cidade") ? String(formData.get("cidade")) : null;
+
+  // re-geocodifica se o endereço mudou
+  const { data: atual } = await supabase
+    .from("agendamentos")
+    .select("endereco, cidade")
+    .eq("id", id)
+    .single();
+  let geo: { lat: number; lng: number } | null = null;
+  if (atual && (atual.endereco !== endereco || atual.cidade !== cidade)) {
+    geo = await geocodeEndereco(endereco, cidade);
+  }
+
+  const { error } = await supabase
+    .from("agendamentos")
+    .update({
+      placa: String(formData.get("placa") ?? "").toUpperCase().trim() || null,
+      marca: formData.get("marca") || null,
+      modelo: formData.get("modelo") || null,
+      ano: formData.get("ano") || null,
+      complexidade: String(formData.get("complexidade") ?? "media"),
+      endereco,
+      cidade,
+      data_agendada: formData.get("data_agendada") || null,
+      janela_inicio: formData.get("janela_inicio") || null,
+      janela_fim: formData.get("janela_fim") || null,
+      contato_nome: formData.get("contato_nome") || null,
+      contato_telefone: formData.get("contato_telefone") || null,
+      observacoes: formData.get("observacoes") || null,
+      cliente_id: formData.get("cliente_id") || null,
+      ...(geo ? { latitude: geo.lat, longitude: geo.lng } : {}),
+    })
+    .eq("id", id);
+  if (error)
+    redirect(`/agendamentos/${id}/editar?erro=${encodeURIComponent(error.message)}`);
+  revalidatePath("/agendamentos");
+  revalidatePath("/rotas");
+  redirect("/agendamentos?ok=" + encodeURIComponent("Agendamento atualizado"));
+}
+
+// Desfaz a atribuição: tira a parada da rota e devolve para "A distribuir"
+export async function desatribuirParada(agendamentoId: string) {
+  const { supabase } = await getSupabaseAndUser();
+
+  const { data: parada } = await supabase
+    .from("rota_paradas")
+    .select("id, rota_id")
+    .eq("agendamento_id", agendamentoId)
+    .maybeSingle();
+  if (parada) {
+    await supabase.from("rota_paradas").delete().eq("id", parada.id);
+    // renumera as paradas restantes da rota
+    const { data: restantes } = await supabase
+      .from("rota_paradas")
+      .select("id, ordem")
+      .eq("rota_id", parada.rota_id)
+      .order("ordem");
+    let i = 1;
+    for (const r of restantes ?? []) {
+      if (r.ordem !== i) await supabase.from("rota_paradas").update({ ordem: i }).eq("id", r.id);
+      i++;
+    }
+  }
+  // remove a vistoria vinculada apenas se ainda não começou
+  await supabase
+    .from("vistorias")
+    .delete()
+    .eq("agendamento_id", agendamentoId)
+    .eq("status", "aguardando");
+  await supabase
+    .from("agendamentos")
+    .update({ status: "confirmado" })
+    .eq("id", agendamentoId);
+  revalidatePath("/rotas");
+  revalidatePath("/agendamentos");
+}
+
+// Reabre uma visita concluída por engano
+export async function reabrirVisita(agendamentoId: string) {
+  const { supabase } = await getSupabaseAndUser();
+  await supabase
+    .from("agendamentos")
+    .update({ status: "roteirizado" })
+    .eq("id", agendamentoId)
+    .eq("status", "concluido");
+  revalidatePath("/minha-rota");
+  revalidatePath("/rotas");
+  revalidatePath("/agendamentos");
+}
+
 export async function cancelarAgendamento(id: string) {
   const { supabase } = await getSupabaseAndUser();
   await supabase.from("agendamentos").update({ status: "cancelado" }).eq("id", id);

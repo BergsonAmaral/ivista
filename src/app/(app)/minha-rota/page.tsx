@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageTitle, Badge } from "@/components/ui";
-import { concluirVisita } from "@/lib/actions";
+import { concluirVisita, reabrirVisita } from "@/lib/actions";
 import { MapPin, Clock, ChevronRight, CheckCircle2 } from "lucide-react";
 import { LocationTracker } from "@/components/LocationTracker";
 
@@ -124,6 +124,13 @@ export default async function MinhaRotaPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
+                        {concluida && (
+                          <form action={reabrirVisita.bind(null, ag.id)}>
+                            <button className="text-xs text-slate-400 hover:text-red-600 underline">
+                              desfazer
+                            </button>
+                          </form>
+                        )}
                         {!concluida && (
                           <form action={concluirVisita.bind(null, ag.id)}>
                             <button className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 text-white px-3 py-2 text-xs font-semibold hover:bg-emerald-500 transition-colors">
