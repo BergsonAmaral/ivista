@@ -13,9 +13,9 @@ const CORES = ["#dc2626", "#2563eb", "#059669", "#d97706", "#7c3aed", "#0891b2"]
 export default async function RotasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ erro?: string; data?: string }>;
+  searchParams: Promise<{ erro?: string; data?: string; vistoriador?: string }>;
 }) {
-  const { erro, data: dataParam } = await searchParams;
+  const { erro, data: dataParam, vistoriador: vistFiltro } = await searchParams;
   const supabase = await createClient();
   const dataSel = dataParam ?? new Date().toISOString().slice(0, 10);
 
@@ -44,6 +44,14 @@ export default async function RotasPage({
   const corDoVistoriador = new Map(
     (vistoriadores ?? []).map((v, i) => [v.id, CORES[i % CORES.length]])
   );
+
+  // Filtro por vistoriador (mapa + cartões); "A distribuir" continua completo
+  const rotasVisiveis = vistFiltro
+    ? (rotas ?? []).filter((r) => r.vistoriador_id === vistFiltro)
+    : (rotas ?? []);
+  const vistoriadoresVisiveis = vistFiltro
+    ? (vistoriadores ?? []).filter((v) => v.id === vistFiltro)
+    : (vistoriadores ?? []);
 
   // ===== sugestão por proximidade (última parada do dia ou base/casa) =====
   const datasPendentes = [
@@ -102,7 +110,7 @@ export default async function RotasPage({
   const pontos: MapPonto[] = [];
   const linhas: MapLinha[] = [];
 
-  for (const r of rotas ?? []) {
+  for (const r of rotasVisiveis) {
     const cor = corDoVistoriador.get(r.vistoriador_id) ?? "#64748b";
     const paradas = ((r.rota_paradas ?? []) as unknown as Parada[]).sort(
       (a, b) => a.ordem - b.ordem
@@ -136,7 +144,7 @@ export default async function RotasPage({
   }
   // posição AO VIVO dos vistoriadores (últimos 15 minutos)
   const agora = Date.now();
-  for (const v of vistoriadores ?? []) {
+  for (const v of vistoriadoresVisiveis) {
     if (
       v.ultima_lat != null &&
       v.ultima_lng != null &&
@@ -167,7 +175,7 @@ export default async function RotasPage({
     }
   }
 
-  const rotaPorVistoriador = new Map((rotas ?? []).map((r) => [r.vistoriador_id, r]));
+  const rotaPorVistoriador = new Map(rotasVisiveis.map((r) => [r.vistoriador_id, r]));
 
   return (
     <div>
@@ -177,11 +185,28 @@ export default async function RotasPage({
       />
       {erro && <Alert tipo="erro">{erro}</Alert>}
 
-      <form className="mb-4 flex items-center gap-2">
+      <form className="mb-4 flex flex-wrap items-center gap-2">
         <input type="date" name="data" defaultValue={dataSel} className={`${inputCls} w-auto`} />
+        <select
+          name="vistoriador"
+          defaultValue={vistFiltro ?? ""}
+          className={`${inputCls} w-auto min-w-[180px]`}
+        >
+          <option value="">Todos os vistoriadores</option>
+          {(vistoriadores ?? []).map((v) => (
+            <option key={v.id} value={v.id}>
+              {v.nome}
+            </option>
+          ))}
+        </select>
         <button className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-zinc-50">
-          Ver dia
+          Filtrar
         </button>
+        {vistFiltro && (
+          <a href={`/rotas?data=${dataSel}`} className="text-sm text-red-600 hover:underline">
+            limpar filtro
+          </a>
+        )}
       </form>
 
       <div className="mb-6">
@@ -263,7 +288,7 @@ export default async function RotasPage({
         Vistoriadores — {new Date(dataSel + "T12:00:00").toLocaleDateString("pt-BR")}
       </h2>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {(vistoriadores ?? []).map((v) => {
+        {vistoriadoresVisiveis.map((v) => {
           const cor = corDoVistoriador.get(v.id)!;
           const rota = rotaPorVistoriador.get(v.id);
           const paradas = ((rota?.rota_paradas ?? []) as unknown as Parada[]).sort(
@@ -330,7 +355,7 @@ export default async function RotasPage({
             </Card>
           );
         })}
-        {!vistoriadores?.length && (
+        {!vistoriadoresVisiveis.length && (
           <Card className="p-8 text-center text-slate-400 text-sm md:col-span-2 xl:col-span-3">
             Nenhum vistoriador ativo. Cadastre na tela Vistoriadores.
           </Card>
