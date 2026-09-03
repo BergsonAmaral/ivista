@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { agendarPeloPortal } from "@/lib/actions";
 import { Card, PageTitle, Alert, Badge, inputCls, btnPrimary } from "@/components/ui";
 import { CopiarLink } from "@/components/CopiarLink";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // Portal da empresa cliente: agenda vistorias e acompanha laudos
 export default async function PortalPage({
@@ -78,7 +79,7 @@ export default async function PortalPage({
             placeholder="Observações (opcional)"
             className={`${inputCls} sm:col-span-2`}
           />
-          <button className={`${btnPrimary} sm:col-span-2`}>Solicitar vistoria</button>
+          <SubmitButton className={`${btnPrimary} sm:col-span-2`}>Solicitar vistoria</SubmitButton>
         </form>
       </Card>
 

@@ -5,6 +5,7 @@ import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
 import { MapPin, Clock } from "lucide-react";
 import { RouteMap, type MapPonto, type MapLinha } from "@/components/RouteMap";
 import { AutoRefresh } from "@/components/AutoRefresh";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // Uma cor por vistoriador (marcadores do mapa e cabeçalho do cartão)
 const CORES = ["#dc2626", "#2563eb", "#059669", "#d97706", "#7c3aed", "#0891b2"];
@@ -248,7 +249,7 @@ export default async function RotasPage({
                       defaultValue={a.data_agendada ?? dataSel}
                       className={`${inputCls} w-auto`}
                     />
-                    <button className={btnPrimary}>Atribuir</button>
+                    <SubmitButton className={btnPrimary}>Atribuir</SubmitButton>
                   </form>
                 </Card>
               );

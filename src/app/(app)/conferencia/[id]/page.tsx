@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageTitle, Alert, Badge, inputCls, btnPrimary, btnSecondary } from "@/components/ui";
 import { concluirConferencia } from "@/lib/actions";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function ConferenciaDetalhePage({
   params,
@@ -178,13 +179,13 @@ export default async function ConferenciaDetalhePage({
               className={inputCls}
             />
             <div className="flex gap-3">
-              <button
+              <SubmitButton
                 name="decisao"
                 value="aprovar"
                 className={`${btnPrimary} flex-1 bg-emerald-600 hover:bg-emerald-700`}
               >
                 Aprovar e liberar entrega
-              </button>
+              </SubmitButton>
               <button name="decisao" value="reprovar" className={`${btnSecondary} flex-1 text-red-600 border-red-300`}>
                 Devolver ao vistoriador
               </button>

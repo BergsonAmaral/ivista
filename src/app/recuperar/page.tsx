@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { recuperarSenha } from "@/lib/actions";
 import { inputCls, btnPrimary } from "@/components/ui";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // Esqueci minha senha: envia o link de redefinição por e-mail
 export default async function RecuperarPage({
@@ -33,7 +34,7 @@ export default async function RecuperarPage({
         <form action={recuperarSenha} className="space-y-3">
           <input type="hidden" name="origem" value={origem} />
           <input name="email" type="email" required placeholder="Seu e-mail" className={inputCls} />
-          <button className={`${btnPrimary} w-full`}>Enviar link de recuperação</button>
+          <SubmitButton className={`${btnPrimary} w-full`}>Enviar link de recuperação</SubmitButton>
         </form>
 
         <a

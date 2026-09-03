@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { geocodeEndereco } from "@/lib/geo";
@@ -83,6 +84,19 @@ export async function logout() {
   redirect("/login");
 }
 
+// Geocodifica DEPOIS de responder (não trava o clique do usuário)
+function geocodificarDepois(agendamentoId: string, endereco: string, cidade: string | null) {
+  after(async () => {
+    const geo = await geocodeEndereco(endereco, cidade);
+    if (!geo) return;
+    const admin = createAdminClient();
+    await admin
+      .from("agendamentos")
+      .update({ latitude: geo.lat, longitude: geo.lng })
+      .eq("id", agendamentoId);
+  });
+}
+
 // ===== FASE 1: AGENDAMENTO =====
 export async function criarAgendamento(formData: FormData) {
   const { supabase, user } = await getSupabaseAndUser();
@@ -108,16 +122,9 @@ export async function criarAgendamento(formData: FormData) {
     }
   }
 
-  const geo = await geocodeEndereco(
-    String(formData.get("endereco")),
-    formData.get("cidade") ? String(formData.get("cidade")) : null
-  );
-
   const { data: novo, error } = await supabase
     .from("agendamentos")
     .insert({
-      latitude: geo?.lat ?? null,
-      longitude: geo?.lng ?? null,
       canal: String(formData.get("canal") ?? "manual"),
       cliente_id: formData.get("cliente_id") || null,
       placa: placa || null,
@@ -140,6 +147,12 @@ export async function criarAgendamento(formData: FormData) {
     .single();
   if (error || !novo)
     redirect(`/agendamentos/novo?erro=${encodeURIComponent(error?.message ?? "erro")}`);
+
+  geocodificarDepois(
+    novo.id,
+    String(formData.get("endereco")),
+    formData.get("cidade") ? String(formData.get("cidade")) : null
+  );
 
   // Atalho do admin: atribuir o vistoriador já na criação (Fases 1+2 numa tela)
   const vistoriadorId = formData.get("vistoriador_id");
@@ -164,17 +177,10 @@ export async function solicitarAgendamentoPublico(formData: FormData) {
     redirect(`/agendar?erro=${encodeURIComponent("Preencha todos os campos obrigatórios")}`);
   }
 
-  const geoPub = await geocodeEndereco(
-    endereco,
-    String(formData.get("cidade") ?? "") || null
-  );
-
   const admin = createAdminClient();
-  const { error } = await admin.from("agendamentos").insert({
+  const { error, data: novoPub } = await admin.from("agendamentos").insert({
     canal: "portal",
     status: "solicitado",
-    latitude: geoPub?.lat ?? null,
-    longitude: geoPub?.lng ?? null,
     placa,
     modelo: String(formData.get("modelo") ?? "").trim() || null,
     endereco,
@@ -183,8 +189,9 @@ export async function solicitarAgendamentoPublico(formData: FormData) {
     contato_nome: contatoNome,
     contato_telefone: contatoTel,
     observacoes: String(formData.get("observacoes") ?? "").trim() || null,
-  });
+  }).select("id").single();
   if (error) redirect(`/agendar?erro=${encodeURIComponent("Não foi possível registrar. Tente novamente.")}`);
+  if (novoPub) geocodificarDepois(novoPub.id, endereco, String(formData.get("cidade") ?? "") || null);
   revalidatePath("/");
   revalidatePath("/agendamentos");
   redirect("/agendar?ok=1");
@@ -196,16 +203,12 @@ export async function atualizarAgendamento(formData: FormData) {
   const endereco = String(formData.get("endereco"));
   const cidade = formData.get("cidade") ? String(formData.get("cidade")) : null;
 
-  // re-geocodifica se o endereço mudou
   const { data: atual } = await supabase
     .from("agendamentos")
     .select("endereco, cidade")
     .eq("id", id)
     .single();
-  let geo: { lat: number; lng: number } | null = null;
-  if (atual && (atual.endereco !== endereco || atual.cidade !== cidade)) {
-    geo = await geocodeEndereco(endereco, cidade);
-  }
+  const enderecoMudou = !!atual && (atual.endereco !== endereco || atual.cidade !== cidade);
 
   const { error } = await supabase
     .from("agendamentos")
@@ -224,11 +227,11 @@ export async function atualizarAgendamento(formData: FormData) {
       contato_telefone: formData.get("contato_telefone") || null,
       observacoes: formData.get("observacoes") || null,
       cliente_id: formData.get("cliente_id") || null,
-      ...(geo ? { latitude: geo.lat, longitude: geo.lng } : {}),
     })
     .eq("id", id);
   if (error)
     redirect(`/agendamentos/${id}/editar?erro=${encodeURIComponent(error.message)}`);
+  if (enderecoMudou) geocodificarDepois(id, endereco, cidade);
   revalidatePath("/agendamentos");
   revalidatePath("/rotas");
   redirect("/agendamentos?ok=" + encodeURIComponent("Agendamento atualizado"));
@@ -354,9 +357,7 @@ export async function agendarPeloPortal(formData: FormData) {
     redirect(`/portal?erro=${encodeURIComponent("Preencha placa, endereço e data")}`);
   }
 
-  const geo = await geocodeEndereco(endereco, String(formData.get("cidade") ?? "") || null);
-
-  const { error } = await supabase.from("agendamentos").insert({
+  const { error, data: novoPortal } = await supabase.from("agendamentos").insert({
     canal: "portal",
     status: "solicitado",
     cliente_id: me.cliente_id,
@@ -368,10 +369,10 @@ export async function agendarPeloPortal(formData: FormData) {
     contato_nome: String(formData.get("contato_nome") ?? "").trim() || null,
     contato_telefone: String(formData.get("contato_telefone") ?? "").trim() || null,
     observacoes: String(formData.get("observacoes") ?? "").trim() || null,
-    latitude: geo?.lat ?? null,
-    longitude: geo?.lng ?? null,
-  });
+  }).select("id").single();
   if (error) redirect(`/portal?erro=${encodeURIComponent(error.message)}`);
+  if (novoPortal)
+    geocodificarDepois(novoPortal.id, endereco, String(formData.get("cidade") ?? "") || null);
   revalidatePath("/portal");
   redirect("/portal?ok=1");
 }

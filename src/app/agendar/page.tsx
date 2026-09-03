@@ -1,5 +1,6 @@
 import { solicitarAgendamentoPublico } from "@/lib/actions";
 import { inputCls, btnPrimary } from "@/components/ui";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // Página PÚBLICA de agendamento — o cliente/parceiro solicita sem login.
 // O pedido entra como "Solicitado" e a equipe confirma e roteiriza.
@@ -100,7 +101,7 @@ export default async function AgendarPublicoPage({
               />
             </fieldset>
 
-            <button className={`${btnPrimary} w-full`}>Solicitar agendamento</button>
+            <SubmitButton className={`${btnPrimary} w-full`}>Solicitar agendamento</SubmitButton>
           </form>
         </div>
 

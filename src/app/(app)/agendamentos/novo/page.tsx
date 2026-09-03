@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { criarAgendamento } from "@/lib/actions";
 import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function NovoAgendamentoPage({
   searchParams,
@@ -146,7 +147,7 @@ export default async function NovoAgendamentoPage({
             </select>
           </fieldset>
 
-          <button className={`${btnPrimary} w-full`}>Confirmar agendamento</button>
+          <SubmitButton className={`${btnPrimary} w-full`}>Confirmar agendamento</SubmitButton>
         </Card>
       </form>
     </div>

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { atualizarMembroEquipe, criarMembroEquipe } from "@/lib/actions";
 import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
+import { SubmitButton } from "@/components/SubmitButton";
 
 const ROLES = [
   { valor: "atendente", label: "Atendente" },
@@ -73,7 +74,7 @@ export default async function EquipePage({
               </option>
             ))}
           </select>
-          <button className={`${btnPrimary} sm:col-span-2`}>Criar acesso</button>
+          <SubmitButton className={`${btnPrimary} sm:col-span-2`}>Criar acesso</SubmitButton>
         </form>
       </Card>
 
@@ -120,7 +121,7 @@ export default async function EquipePage({
                 placeholder="Endereço base (casa) — usado na sugestão de rotas"
                 className={`${inputCls} flex-1 min-w-[220px]`}
               />
-              <button className={`${btnPrimary} ml-auto`}>Salvar</button>
+              <SubmitButton className={`${btnPrimary} ml-auto`}>Salvar</SubmitButton>
             </form>
           </Card>
         ))}

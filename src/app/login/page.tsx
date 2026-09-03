@@ -1,5 +1,6 @@
 import { login, signup } from "@/lib/actions";
 import { inputCls, btnPrimary } from "@/components/ui";
+import { SubmitButton } from "@/components/SubmitButton";
 
 const DIFERENCIAIS = [
   "Agendamento centralizado em todos os canais",
@@ -98,9 +99,9 @@ export default async function LoginPage({
               placeholder="Senha"
               className={inputCls}
             />
-            <button className={`${btnPrimary} w-full`}>
+            <SubmitButton className={`${btnPrimary} w-full`}>
               {cadastro ? "Criar conta" : "Entrar"}
-            </button>
+            </SubmitButton>
           </form>
 
           <a

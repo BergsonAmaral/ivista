@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { atualizarAgendamento } from "@/lib/actions";
 import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function EditarAgendamentoPage({
   params,
@@ -147,7 +148,7 @@ export default async function EditarAgendamentoPage({
             </label>
           </fieldset>
 
-          <button className={`${btnPrimary} w-full`}>Salvar alterações</button>
+          <SubmitButton className={`${btnPrimary} w-full`}>Salvar alterações</SubmitButton>
         </Card>
       </form>
     </div>

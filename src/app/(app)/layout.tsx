@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { logout, ensureProfile } from "@/lib/actions";
+import { logout } from "@/lib/actions";
+import { getSessionProfile } from "@/lib/session";
 import { SideNav, BottomNav, type NavItem } from "@/components/NavLinks";
 import { LogOut, KeyRound } from "lucide-react";
 
@@ -29,11 +29,7 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const profile = user ? await ensureProfile() : null;
+  const { user, profile } = await getSessionProfile();
 
   const itens = NAV.filter((n) => n.roles.includes(profile?.role ?? "atendente")).map(
     ({ href, label, icon, section }) => ({ href, label, icon, section })

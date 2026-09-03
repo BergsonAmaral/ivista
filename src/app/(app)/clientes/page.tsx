@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { criarCliente, criarAcessoCliente } from "@/lib/actions";
 import { Card, PageTitle, Alert, inputCls, btnPrimary } from "@/components/ui";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function ClientesPage({
   searchParams,
@@ -33,7 +34,7 @@ export default async function ClientesPage({
             <input name="email" type="email" placeholder="E-mail" className={inputCls} />
             <input name="telefone" placeholder="Telefone" className={inputCls} />
             <input name="whatsapp" placeholder="WhatsApp" className={inputCls} />
-            <button className={`${btnPrimary} w-full`}>Cadastrar</button>
+            <SubmitButton className={`${btnPrimary} w-full`}>Cadastrar</SubmitButton>
           </form>
         </Card>
 
@@ -76,7 +77,7 @@ export default async function ClientesPage({
                     placeholder="Senha provisória"
                     className={`${inputCls} w-auto flex-1 min-w-[140px]`}
                   />
-                  <button className={btnPrimary}>Criar acesso do portal</button>
+                  <SubmitButton className={btnPrimary}>Criar acesso do portal</SubmitButton>
                 </form>
               )}
             </Card>

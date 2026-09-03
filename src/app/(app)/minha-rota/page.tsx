@@ -5,6 +5,7 @@ import { Card, PageTitle, Badge } from "@/components/ui";
 import { concluirVisita, reabrirVisita } from "@/lib/actions";
 import { MapPin, Clock, ChevronRight, CheckCircle2 } from "lucide-react";
 import { LocationTracker } from "@/components/LocationTracker";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // Tela do vistoriador: a rota DELE, dia a dia, com as paradas em ordem.
 export default async function MinhaRotaPage() {
@@ -133,9 +134,9 @@ export default async function MinhaRotaPage() {
                         )}
                         {!concluida && (
                           <form action={concluirVisita.bind(null, ag.id)}>
-                            <button className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 text-white px-3 py-2 text-xs font-semibold hover:bg-emerald-500 transition-colors">
-                              <CheckCircle2 className="h-4 w-4" /> Concluir
-                            </button>
+                            <SubmitButton className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 text-white px-3 py-2 text-xs font-semibold hover:bg-emerald-500 transition-colors disabled:opacity-50">
+                              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> Concluir</span>
+                            </SubmitButton>
                           </form>
                         )}
                         {vistoria && (
